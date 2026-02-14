@@ -9,12 +9,12 @@ import unicodedata
 # Dashes between words
 
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/englishsongs.csv", encoding='utf-8-sig')
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/structured_lyrics.csv", encoding='utf-8-sig')
 
 print(df.shape)
 
 # Change all words to lower-case
-df["lyrics"] = df["lyrics"].str.lower()
+df["lyrics"] = df["structured_lyrics"].str.lower()
 
 
 # Handle brackets and ad-libs
