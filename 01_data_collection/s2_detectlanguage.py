@@ -11,10 +11,7 @@ def detect_lang(text):
     except:
         return "unknown"
     
-print("dfgh")
 df["language"] = df["lyrics"].apply(detect_lang)
-print("dfgh")
-
 
 # Filter english songs
 eng_df = df[df["language"] == "en"]

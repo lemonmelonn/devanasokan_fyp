@@ -35,9 +35,9 @@ df_sample = df.head(10).copy()
 df_sample['structured_lyrics'] = df_sample.apply(get_structured_lyrics, axis=1)
 
 # Insert a new column 'token_id' at the first position
-df_sample.insert(0, 'token_id', range(1, len(df_sample) + 1))
+df_sample.insert(0, 'song_id', range(1, len(df_sample) + 1))
 
-df = df_sample[['token_id', 'clean_track_name', 'clean_primary_artist', 'artist_names', 'structured_lyrics']]
+df = df_sample[['song_id', 'clean_track_name', 'clean_primary_artist', 'artist_names', 'structured_lyrics']]
 
 # Save the new data
 df.to_csv('./storage/structured_lyrics.csv', index=False, encoding="utf-8-sig")

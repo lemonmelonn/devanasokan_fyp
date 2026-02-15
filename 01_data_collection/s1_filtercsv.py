@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/kagglesongs/top-10k-spotify-songs-2025-07-detailed.csv")
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/datasource/top-10k-spotify-songs-2025-07-detailed.csv")
 
 print(df.shape)
 
