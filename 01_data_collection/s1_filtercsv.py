@@ -32,7 +32,11 @@ def clean_search_params(track_name, artist_names):
     primary_artist = artist_names.split('|')[0]
     
     # 2. Clean Track Name: Remove extra info in parentheses or brackets
-    clean_track = re.sub(r'\(.*?\)|\[.*?\]', '', track_name).strip()
+    clean_track = re.split(r' \-| –| —', track_name)[0]
+    clean_track = re.sub(r'\(.*?\)|\[.*?\]', '', clean_track).strip()
+
+    # # 3. Final Cleanup: Remove trailing punctuation often left behind
+    # clean_track = clean_track.strip(string.punctuation + ' ')
     
     # Return as a Series so we can create two columns at once
     return pd.Series([clean_track, primary_artist])
