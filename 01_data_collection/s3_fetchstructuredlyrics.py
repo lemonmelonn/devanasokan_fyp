@@ -31,7 +31,7 @@ def get_structured_lyrics(row):
         print(f"Error fetching {row['clean_track_name']}: {e}")
         return None
     
-df_sample = df.head(10).copy()
+df_sample = df.head(100).copy()
 df_sample['structured_lyrics'] = df_sample.apply(get_structured_lyrics, axis=1)
 
 # Insert a new column 'token_id' at the first position
