@@ -1,9 +1,15 @@
 import pandas as pd
 from langdetect import detect
+from tqdm import tqdm
+
+tqdm.pandas()
 
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/noexplicit.csv")
 
 print(df.shape)
+
+
+# add tqdm
 
 def detect_lang(text):
     try:
@@ -11,7 +17,7 @@ def detect_lang(text):
     except:
         return "unknown"
     
-df["language"] = df["lyrics"].apply(detect_lang)
+df["language"] = df["lyrics"].progress_apply(detect_lang)
 
 # Filter english songs
 eng_df = df[df["language"] == "en"]
