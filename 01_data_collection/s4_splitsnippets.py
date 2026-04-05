@@ -30,7 +30,7 @@ fulldf = fulldf.drop(columns=['lyrics'])
 
 # Save output
 print(fulldf.shape)
-fulldf.to_csv('./storage/structured_fullsongs.csv', index=False, encoding='utf-8-sig')
+fulldf.to_csv('./storage/fullsongs.csv', index=False, encoding='utf-8-sig')
 
 # CREATE DATAFRAME FOR VERSES ------------------------------------------------------------
 
@@ -79,4 +79,4 @@ verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))
 
 # Save output
 print(verse_df.shape)
-verse_df.to_csv('./storage/structured_verses.csv', index=False, encoding='utf-8-sig')
+verse_df.to_csv('./storage/verses.csv', index=False, encoding='utf-8-sig')

@@ -3,7 +3,7 @@ import re
 import contractions
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/structured_lyrics.csv", encoding='utf-8-sig')
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/geniuslyrics.csv", encoding='utf-8-sig')
 
 # Drop old column and rename
 df = df.drop(columns=['lyrics'])
@@ -96,4 +96,4 @@ df['lyrics'] = df['lyrics'].apply(clean_lyrics)
 print("After cleaning:", df.shape)
 
 # Save output
-df.to_csv('./storage/clean_lyrics.csv', index=False, encoding='utf-8-sig')
+df.to_csv('./storage/cleanlyrics.csv', index=False, encoding='utf-8-sig')

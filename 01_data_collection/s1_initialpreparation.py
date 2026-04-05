@@ -5,20 +5,13 @@ df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/datasource/top-10k-spo
 
 print(df.shape)
 
+# Do not remove rows with missing lyrics, because some songs actually have lyrics
+# So we keep all non-explicit records, and collect ourselves
+
 # Filter out explicit songs
-df = df[df['explicit'] == 0]
+# df = df[df['explicit'] == 0]
 
-# Replace all types of newlines (\r\n or \n) with a comma and a space
-# regex=True allows us to catch the hidden newline characters
-df['lyrics'] = df['lyrics'].str.replace(r'\r\n|\r|\n', ', ', regex=True)
-
-# Remove songs with no lyrics
-df.dropna(subset=["lyrics"], inplace=True)
-
-# Replace double commas (including those with spaces between them)
-# \s* matches any amount of whitespace
-df['lyrics'] = df['lyrics'].str.replace(r',\s*,', ',', regex=True)
-
+# Get clean track and artist names (easier for Genius API)
 def clean_search_params(track_name, artist_names):
     # Ensure inputs are strings to avoid errors with NaN values
     track_name = str(track_name) if pd.notnull(track_name) else ""
@@ -42,8 +35,9 @@ df[['clean_track_name', 'clean_primary_artist']] = df.apply(
     lambda row: clean_search_params(row['track_name'], row['artist_names']), axis=1
 )
 
-noexplicit = df
+# Remove lyrics columns (Since collection will happen later)
+df = df.drop(columns=['lyrics'])
 
-print(noexplicit.shape)
-
-noexplicit.to_csv("./storage/noexplicit.csv", index=False)
+# Save output
+print(df.shape)
+df.to_csv("./storage/noexplicit.csv", index=False)
