@@ -5,8 +5,7 @@ df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/datasource/top-10k-spo
 
 print(df.shape)
 
-# Do not remove rows with missing lyrics, because some songs actually have lyrics
-# So we keep all non-explicit records, and collect ourselves
+# Remove songs with no lyrics (white noise, baby noise, etc)s
 
 # Filter out explicit songs
 # df = df[df['explicit'] == 0]

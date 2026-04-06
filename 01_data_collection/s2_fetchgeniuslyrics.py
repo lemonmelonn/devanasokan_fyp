@@ -34,7 +34,7 @@ def get_structured_lyrics(row):
         print(f"Error fetching {row['clean_track_name']}: {e}")
         return None
     
-df['structured_lyrics'] = df.progress_apply(get_structured_lyrics, axis=1)
+df['genius_lyrics'] = df.progress_apply(get_structured_lyrics, axis=1)
 
 # Insert a new column 'song_id' at the first position
 df.insert(0, 'song_id', range(1, len(df) + 1))

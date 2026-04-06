@@ -3,16 +3,7 @@ import re
 import contractions
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/geniuslyrics.csv", encoding='utf-8-sig')
-
-# Drop old column and rename
-df = df.drop(columns=['lyrics'])
-df.rename(columns={'structured_lyrics': 'lyrics'}, inplace=True)
-
-# Remove missing / empty lyrics
-df = df.dropna(subset=['lyrics'])
-df = df[df['lyrics'].str.strip() != ""]
-
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/splitverses.csv", encoding='utf-8-sig')
 print("Initial shape:", df.shape)
 
 
@@ -68,7 +59,7 @@ def clean_lyrics(text):
     # 6. Join verses with double line breaks
     text = "\n\n".join(cleaned_verses)
 
-    # 7. Apply contractions
+    # 7. Apply contractions (easier for model training)
     try:
         text = contractions.fix(text)
     except:
@@ -91,9 +82,11 @@ def clean_lyrics(text):
 
 
 # Apply cleaning
-df['lyrics'] = df['lyrics'].apply(clean_lyrics)
+df['lyrics'] = df['genius_lyrics'].apply(clean_lyrics)
 
-print("After cleaning:", df.shape)
+# Remove genius_lyrics columns
+df = df.drop(columns=['genius_lyrics'])
 
 # Save output
-df.to_csv('./storage/cleanlyrics.csv', index=False, encoding='utf-8-sig')
+print("After cleaning:", df.shape)
+df.to_csv('./storage/cleanverses.csv', index=False, encoding='utf-8-sig')

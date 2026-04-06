@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/clean_lyrics.csv", encoding='utf-8-sig')
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/cleanlyrics.csv", encoding='utf-8-sig')
 
 print(df.shape)
 print(df.columns)
@@ -30,6 +30,7 @@ fulldf = fulldf.drop(columns=['lyrics'])
 
 # Save output
 print(fulldf.shape)
+print(fulldf.columns)
 fulldf.to_csv('./storage/fullsongs.csv', index=False, encoding='utf-8-sig')
 
 # CREATE DATAFRAME FOR VERSES ------------------------------------------------------------
@@ -68,7 +69,7 @@ verse_df = df[['song_id', 'rank', 'track_name', 'track_id', 'artist_names',
        'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo',
        'duration_ms', 'time_signature', 'total_artist_followers',
        'avg_artist_popularity', 'artist_genres', 'main_genres',
-       'clean_track_name', 'clean_primary_artist', 'language', 'verses']].explode('verses')
+       'clean_track_name', 'clean_primary_artist', 'verses']].explode('verses')
 
 
 # Remove verses that are exactly the same
@@ -79,4 +80,5 @@ verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))
 
 # Save output
 print(verse_df.shape)
+print(verse_df.columns)
 verse_df.to_csv('./storage/verses.csv', index=False, encoding='utf-8-sig')
