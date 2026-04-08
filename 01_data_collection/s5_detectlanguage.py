@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 tqdm.pandas()
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/cleanverses.csv")
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/splitverses.csv")
 
 print(df.shape)
 

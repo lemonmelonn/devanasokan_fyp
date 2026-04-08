@@ -84,6 +84,12 @@ def clean_lyrics(text):
 # Apply cleaning
 df['lyrics'] = df['genius_lyrics'].apply(clean_lyrics)
 
+# Remove songs that have "white noise", "sleep" in genre
+df = df[~df['artist_genres'].str.contains("white noise", case=False, na=False)]
+df = df[~df['artist_genres'].str.contains("sleep", case=False, na=False)]
+df = df[~df['artist_genres'].str.contains("native american music", case=False, na=False)]
+print("After removing:", df.shape)
+
 # Remove genius_lyrics columns
 df = df.drop(columns=['genius_lyrics'])
 

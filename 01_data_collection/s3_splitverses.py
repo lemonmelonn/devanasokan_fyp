@@ -62,6 +62,9 @@ for _, row in df.iterrows():
 # Create new dataframe
 verse_df = pd.DataFrame(new_rows)
 
+# Format verses into a single line (separated by commas)
+
+
 # Insert a new column 'verse_id' at the first position
 verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))
 

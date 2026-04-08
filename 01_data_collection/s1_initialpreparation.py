@@ -7,6 +7,12 @@ print(df.shape)
 
 # Remove songs with no lyrics (white noise, baby noise, etc)s
 
+# Remove songs that have certain words (in a list) in genre
+remove_keywords = ["white noise", "sleep", "native american music"]
+for keyword in remove_keywords:
+    df = df[~df['artist_genres'].str.contains(keyword, case=False, na=False)]
+print("After removing:", df.shape)
+
 # Filter out explicit songs
 # df = df[df['explicit'] == 0]
 
