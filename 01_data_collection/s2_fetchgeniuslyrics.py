@@ -9,9 +9,9 @@ tqdm.pandas()
 # Load environment variables from .env
 load_dotenv()
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/noexplicit.csv", encoding='utf-8-sig')
-
-print(df.shape)
+# Load dataset
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/songlist.csv", encoding='utf-8-sig')
+print("Initial shape:", df.shape)
 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 genius = lyricsgenius.Genius(
@@ -40,5 +40,5 @@ df['genius_lyrics'] = df.progress_apply(get_structured_lyrics, axis=1)
 df.insert(0, 'song_id', range(1, len(df) + 1))
 
 # Save output
-print(df.shape)
+print("Final shape:", df.shape)
 df.to_csv('./storage/geniuslyrics.csv', index=False, encoding="utf-8-sig")

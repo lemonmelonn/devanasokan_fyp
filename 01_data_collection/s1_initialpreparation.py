@@ -1,20 +1,17 @@
 import pandas as pd
 import re
 
+# Load dataset
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/datasource/top-10k-spotify-songs-2025-07-detailed.csv")
+print("Initial shape:", df.shape)
 
-print(df.shape)
-
-# Remove songs with no lyrics (white noise, baby noise, etc)s
 
 # Remove songs that have certain words (in a list) in genre
-remove_keywords = ["white noise", "sleep", "native american music"]
+remove_keywords = ["white noise", "sleep", "native american music", "tamil", "bangla", "turkish"] # can add more languages
 for keyword in remove_keywords:
     df = df[~df['artist_genres'].str.contains(keyword, case=False, na=False)]
 print("After removing:", df.shape)
 
-# Filter out explicit songs
-# df = df[df['explicit'] == 0]
 
 # Get clean track and artist names (easier for Genius API)
 def clean_search_params(track_name, artist_names):
@@ -43,6 +40,9 @@ df[['clean_track_name', 'clean_primary_artist']] = df.apply(
 # Remove lyrics columns (Since collection will happen later)
 df = df.drop(columns=['lyrics'])
 
+# Split supporting data from essential data?
+
+
 # Save output
-print(df.shape)
-df.to_csv("./storage/noexplicit.csv", index=False)
+print("Final shape:", df.shape)
+df.to_csv("./storage/songlist.csv", index=False)

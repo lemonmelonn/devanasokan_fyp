@@ -4,9 +4,9 @@ from tqdm import tqdm
 
 tqdm.pandas()
 
+# Load dataset
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/splitverses.csv")
-
-print(df.shape)
+print("Initial shape:", df.shape)
 
 # Load model
 lang_detector = pipeline("text-classification", 
@@ -28,7 +28,7 @@ def detect_language(text):
     
 
 # df['language'] = df['lyrics'].progress_apply(detect_language)
-df[['language', 'confidence']] = df['lyrics'].progress_apply(
+df[['language', 'confidence']] = df['genius_lyrics'].progress_apply(
     lambda x: pd.Series(detect_language(x))
 )
 

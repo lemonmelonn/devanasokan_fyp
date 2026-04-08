@@ -6,8 +6,8 @@ df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/geniuslyrics.c
 print("Initial shape:", df.shape)
 
 # Remove missing / empty lyrics
-df = df.dropna(subset=['genius_lyrics'])
-df = df[df['genius_lyrics'].str.strip() != ""]
+# df = df.dropna(subset=['genius_lyrics'])
+# df = df[df['genius_lyrics'].str.strip() != ""]
 
 print("Shape after clean:", df.shape)
 
@@ -63,7 +63,7 @@ for _, row in df.iterrows():
 verse_df = pd.DataFrame(new_rows)
 
 # Format verses into a single line (separated by commas)
-
+verse_df['genius_lyrics'] = verse_df['genius_lyrics'].apply(lambda x: ', '.join(x.splitlines()))
 
 # Insert a new column 'verse_id' at the first position
 verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))

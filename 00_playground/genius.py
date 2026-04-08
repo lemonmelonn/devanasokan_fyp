@@ -19,7 +19,7 @@ def get_structured_lyrics():
     try:
         # It is MUCH better to search using both Artist and Title
         # to avoid getting the wrong song or a cover version.
-        song = genius.search_song("Dtmf", "Bad Bunny")
+        song = genius.search_song("Pavazha malli", "Sai Abyankar")
         
         if song:
             return song.lyrics
