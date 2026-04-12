@@ -2,15 +2,10 @@ import pandas as pd
 import re
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/geniuslyrics.csv", encoding='utf-8-sig')
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/geniuslyrics.csv", low_memory=False,encoding='utf-8-sig')
 print("Initial shape:", df.shape)
 
-# Remove missing / empty lyrics
-# df = df.dropna(subset=['genius_lyrics'])
-# df = df[df['genius_lyrics'].str.strip() != ""]
-
-print("Shape after clean:", df.shape)
-
+# Fix brackets that span multiple lines
 def fix_multiline_brackets(text):
     if not isinstance(text, str):
         return text
@@ -27,7 +22,7 @@ def fix_multiline_brackets(text):
 
 df['genius_lyrics'] = df['genius_lyrics'].apply(fix_multiline_brackets)
 
-
+# Function to split lyrics into verses
 def split_lyrics_sections(lyrics):
     if not isinstance(lyrics, str):
         return []
@@ -49,6 +44,7 @@ def split_lyrics_sections(lyrics):
 
 new_rows = []
 
+# Iterate through each row and split lyrics into sections
 for _, row in df.iterrows():
     sections = split_lyrics_sections(row['genius_lyrics'])
     
@@ -67,6 +63,9 @@ verse_df['genius_lyrics'] = verse_df['genius_lyrics'].apply(lambda x: ', '.join(
 
 # Insert a new column 'verse_id' at the first position
 verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))
+
+# Remove 'lyrics' columns
+verse_df.drop(columns=['lyrics'], inplace=True, errors='ignore')
 
 # Save output
 print("After splitting:", verse_df.shape)

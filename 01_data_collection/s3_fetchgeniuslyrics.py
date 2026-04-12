@@ -10,9 +10,10 @@ tqdm.pandas()
 load_dotenv()
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/songlist.csv", encoding='utf-8-sig')
-print("Initial shape:", df.shape)
+df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/englishsongs.csv", encoding='utf-8-sig')
+print("\nInitial shape:", df.shape, "\n")
 
+# Initialize Genius API client
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 genius = lyricsgenius.Genius(
     ACCESS_TOKEN,
@@ -20,11 +21,11 @@ genius = lyricsgenius.Genius(
     retries=3
 )
 
+# Function to fetch lyrics for a given track and artist
 def get_structured_lyrics(row):
     try:
-        # It is MUCH better to search using both Artist and Title
-        # to avoid getting the wrong song or a cover version.
-        song = genius.search_song(row['clean_track_name'], row['clean_primary_artist'])
+        # Search using both track name and artist name to avoid getting the wrong song or a cover version.
+        song = genius.search_song(row['clean_track_name'], row['primary_artist'])
         
         if song:
             return song.lyrics
