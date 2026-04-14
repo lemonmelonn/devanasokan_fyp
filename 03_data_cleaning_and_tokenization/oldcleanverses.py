@@ -1,6 +1,5 @@
 import pandas as pd
 import re
-import contractions
 
 # Load dataset
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/splitverses.csv", encoding='utf-8-sig')
@@ -59,11 +58,8 @@ def clean_lyrics(text):
     # 6. Join verses with double line breaks
     text = "\n\n".join(cleaned_verses)
 
-    # 7. Apply contractions (easier for model training)
-    try:
-        text = contractions.fix(text)
-    except:
-        pass
+    # 7. Replace trailing apostrophes in words with g
+    text = re.sub(r"(\w)'(?=\W|$)", r"\1g", text)
 
     # 8. Lowercase everything
     text = text.lower()

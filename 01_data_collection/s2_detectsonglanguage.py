@@ -35,7 +35,7 @@ df[['language', 'confidence']] = df['lyrics'].progress_apply(
 
 # Filter english songs
 # Keep unknown as well, for missing lyrics
-eng_df = df[(df["language"] == "en") | (df["language"] == "unknown") | (df["confidence"] <= 0.5)]
+eng_df = df[(df["language"] == "en") | (df["language"] == "unknown") | (df["confidence"] <= 0.7)]
 print(f"Saving dataframe size {eng_df.shape} to csv")
 eng_df.to_csv("./storage/englishsongs.csv", index=False, encoding="utf-8-sig")
 

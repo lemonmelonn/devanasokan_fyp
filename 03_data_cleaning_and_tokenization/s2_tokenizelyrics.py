@@ -6,8 +6,9 @@ from tqdm import tqdm
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/cleanverses.csv", encoding='utf-8-sig')
 print("Initial shape:", df.shape)
 
-# Tokenization
+# Tokenization (bert-base-cased later)
 nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"])
+
 
 # Ensure 'total' is set so the progress bar knows the limit
 df['tokens'] = [

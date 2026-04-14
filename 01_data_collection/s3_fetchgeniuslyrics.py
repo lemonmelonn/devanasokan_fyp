@@ -11,7 +11,8 @@ load_dotenv()
 
 # Load dataset
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/englishsongs.csv", encoding='utf-8-sig')
-print("\nInitial shape:", df.shape, "\n")
+# print("\nInitial shape:", df.shape, "\n")
+print("\nInitial shape: (6679,11)\n")
 
 # Initialize Genius API client
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
