@@ -215,5 +215,8 @@ storage/
 huggingface_cache/
 my_bert_models/
 
+05_model_training/my_final_model/
+05_model_training/results/
+
 # CSV Files
 *.csv
