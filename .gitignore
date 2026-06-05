@@ -216,7 +216,12 @@ huggingface_cache/
 my_bert_models/
 
 05_model_training/my_final_model/
+05_model_training/my_final_bert/
+05_model_training/lstm_artifacts/
 05_model_training/results/
 
 # CSV Files
 *.csv
+
+
+05_model_training/lstm_lyrics_classifier.pt
