@@ -14,6 +14,7 @@ Unified tokenization for all models
 
 Design dashboard
 Structure of final report
+Pipeline needs to be csv based, update line by line
 Me
 
 

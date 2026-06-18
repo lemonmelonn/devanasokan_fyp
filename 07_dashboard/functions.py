@@ -1,10 +1,15 @@
+from ast import With
 import re
 import os
+import pandas as pd
 from dotenv import load_dotenv
 import lyricsgenius
 import contractions
 import pandas as pd
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+
+from csv_functions import add_nonexplicit_song, add_explicit_song, add_verses, update_clean_verse, update_verse_label_score
+from spotify_functions import get_song_details
 
 # Load environment variables from .env
 load_dotenv()
@@ -28,6 +33,18 @@ def load_model():
     classifier = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
     return classifier
 
+# Function to detect if a song is explicit based on Spotify metadata
+def detect_explicit(songdetails):
+    if songdetails is None:
+        print("No song details provided.")
+        return None
+    
+    if explicit := songdetails.get("explicit"):
+        print(f"Explicit: {explicit}")
+        return True
+    else:
+        print(f"Explicit: {explicit}")
+        return False
 
 # Function to fetch lyrics for a given track and artist
 def get_structured_lyrics(artist, track):
@@ -45,7 +62,7 @@ def get_structured_lyrics(artist, track):
     
 
 # Split lyrics into verses based on [Section ...] markers
-def split_verses(fullsong):
+def split_verses(song_id, fullsong):
 
     # Fix brackets that span multiple lines
     def fix_multiline_brackets(text):
@@ -87,8 +104,12 @@ def split_verses(fullsong):
     split_song = split_lyrics_sections(fixed_song)
 
     verses = []
+    verse_id = 1
     for _, verse_text in split_song:
         verses.append(verse_text)
+        add_verses(song_id, verse_id, _, verse_text, "verselabels.csv")
+        verse_id += 1
+        print(f"Verse: {verse_text[:30]}...\n")  # Print the first 30 characters of each verse for verification
 
     # Save as df
     df = pd.DataFrame({"ori_verse": verses})
@@ -100,19 +121,30 @@ def split_verses(fullsong):
 
 
 # Clean the verses by removing unwanted characters, fixing contractions, and normalizing text
-def clean_verses(full_song):
+def clean_verses(song_id):
 
-    df = split_verses(full_song)
+    # Read from verselabels.csv
+    df = pd.read_csv("verselabels.csv", dtype={"song_id": "str"}, keep_default_na=False)
+    song_df = df[df["song_id"] == str(song_id)]
+    print(f"Number of verses for Song ID {song_id}: {len(song_df)}")
+
+    if "clean_verse" in song_df.columns:
+        uncleaned_verse = song_df[
+            song_df["clean_verse"].isna() |
+            (song_df["clean_verse"].astype(str).str.strip() == "")
+        ]
+    else:
+        uncleaned_verse = song_df
+
+    print(f"Number of uncleaned verses for Song ID {song_id}: {len(uncleaned_verse)}")
+
+    cleaned_verses = []
 
     # Remove lyrics with unkown script
     def contains_unknown_script(text):
         # Check for characters outside the basic Latin and common punctuation
         return bool(re.search(r'[^\x00-\x7F]', text))
 
-    df = df[~df['verse'].apply(contains_unknown_script)]
-
-    # Remove rows where 'lyrics' is NaN after cleaning
-    df = df.dropna(subset=["verse"])
 
     # Clean lyrics function
     def clean_lyrics(text):
@@ -152,21 +184,9 @@ def clean_verses(full_song):
 
         return text.strip()
 
-    # Apply cleaning
-    df['lyrics'] = df['verse'].apply(clean_lyrics)
-
-    # Fix words that end with in'
-    df['lyrics'] = df['lyrics'].str.replace(
-        r"\b(\w+?)in['’]",
-        r"\1ing",
-        regex=True
-    )
-
     # Handle vocables
     def normalize_vocables(text):
         return re.sub(r'\b(\w{2,})(-\1)+\b', r'\1', text)
-
-    df['lyrics'] = df['lyrics'].apply(normalize_vocables)
 
     # Handle shortened words using mapping
     shortened_mapping = {
@@ -192,34 +212,115 @@ def clean_verses(full_song):
             text = text.replace(short, full)
         return text
 
-    df['lyrics'] = df['lyrics'].apply(replace_shortened_words)
+    for _, verse_row in uncleaned_verse.iterrows():
+        verse_id = verse_row.get("verse_id")
+        text = verse_row.get("ori_verse", "")
+        print(f"Original verse: {str(text)[:30]}...")
 
-    # Lowercase all lyrics
-    df['lyrics'] = df['lyrics'].str.lower()
+        if contains_unknown_script(str(text)):
+            print(f"Verse contains unknown script, skipping cleaning: {str(text)[:30]}...")
+            cleaned_text = str(text)
+        else:
+            cleaned_text = clean_lyrics(str(text))
 
-    return df
+            # Fix words that end with in'
+            cleaned_text = re.sub(
+                r"\b(\w+?)in['’](?=\W|$)",
+                r"\1ing",
+                cleaned_text
+            )
+
+            cleaned_text = normalize_vocables(cleaned_text)
+            cleaned_text = replace_shortened_words(cleaned_text)
+            cleaned_text = cleaned_text.lower()
+
+        if verse_id is not None:
+            update_clean_verse(song_id, verse_id, cleaned_text, "verselabels.csv")
+
+        cleaned_verses.append(cleaned_text)
+
+    return "\n\n".join(cleaned_verses)
 
 
 # Loop verses through the model and print results
-def get_model_output(classifier, verses_list):
-    for verse in verses_list:
+# def get_model_output(classifier, verses_list):
+#     print(f"Number of verses: {len(verses_list)}")
+#     verses = []
+#     labels = []
+#     scores = []
+#     for verse in verses_list:
+#         result = classifier(verse)
+#         verses.append(verse)
+#         labels.append(result[0]["label"])
+#         scores.append(result[0]["score"])
+
+#     # Save as df
+#     # Only saving the last record, must find out why
+#     df = pd.DataFrame({"ori_verse": verses, "label": labels, "score": scores})
+#     df.to_csv("model_output.csv", index=False)
+
+
+def get_model_output(classifier, song_id, CSV_FILE):
+
+    # 1. Load CSV
+    df = pd.read_csv(CSV_FILE, dtype={"song_id": str, "verse_id": str, "label": str}, keep_default_na=False)
+    df["score"] = pd.to_numeric(df["score"], errors="coerce")
+
+    # 2. Filter song by song_id
+    song_df = df[df["song_id"] == str(song_id)].copy()
+
+    print(f"Number of verses: {len(song_df)}")
+
+    # 3. Loop through each verse in that song
+    for idx, row in song_df.iterrows():
+
+        verse = row["clean_verse"]
+
+        # skip empty / uncleaned verses
+        if pd.isna(verse) or verse.strip() == "":
+            continue
+
         result = classifier(verse)
-        print(f"Input: {verse} -> Prediction: {result}")
 
-# get_model_output(classifier, verses)
+        label = result[0]["label"]
+        if label == "LABEL_0":
+            label = "SAFE"
+        elif label == "LABEL_1":
+            label = "UNSAFE"
+        else:
+            label = "UNKNOWN"
+        score = result[0]["score"]
+
+        verse_id = row["verse_id"]
+
+        # 4. Update original dataframe using BOTH keys
+        df.loc[
+            (df["song_id"] == str(song_id)) &
+            (df["verse_id"] == verse_id),
+            ["label", "score"]
+        ] = [label, score]
+
+    # 5. Save once at the end (important)
+    df.to_csv(CSV_FILE, index=False)
+
+    print("Update complete")
+    return True
 
 
-# TESTING
+# -------------------------------- TESTING --------------------------------
 
-classifier = load_model()
+# # classifier = load_model()
 
-artist = "Ariana Grande"
-track = "7 rings"
+# artist = "Drake"
+# track = "passionfruit"
 
-full_song = get_structured_lyrics(artist, track)
-print(full_song[:100])
+# # song_id = 2
+# # update_song_label(song_id, "UNSAFE")
 
-verses = clean_verses(full_song)
-for verse in verses["lyrics"]:
-    get_model_output(classifier, [verse])
-    print("\n---\n")
+# full_song = get_structured_lyrics(artist, track)
+# print(full_song[:100])
+
+# verses = clean_verses(track, full_song)
+# # for verse in verses["lyrics"]:
+# #     get_model_output(classifier, [verse])
+# #     print("\n---\n")

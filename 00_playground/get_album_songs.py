@@ -8,7 +8,7 @@ load_dotenv()
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
-ALBUM_NAME = "1989"
+ALBUM_NAME = "Love Sick (Deluxe)"
 
 
 def get_access_token():
