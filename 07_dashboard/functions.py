@@ -7,8 +7,9 @@ import lyricsgenius
 import contractions
 import pandas as pd
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+import ollama
 
-from csv_functions import add_nonexplicit_song, add_explicit_song, add_verses, update_clean_verse, update_verse_label_score
+from csv_functions import add_nonexplicit_song, add_explicit_song, add_verses, update_clean_verse, update_song_info, update_verse_label_score
 from spotify_functions import get_song_details
 
 # Load environment variables from .env
@@ -271,6 +272,7 @@ def get_model_output(classifier, song_id, CSV_FILE):
 
     print(f"Number of verses: {len(song_df)}")
 
+    label_list = []
     # 3. Loop through each verse in that song
     for idx, row in song_df.iterrows():
 
@@ -282,6 +284,7 @@ def get_model_output(classifier, song_id, CSV_FILE):
 
         result = classifier(verse)
 
+        # Get label and map to "SAFE" or "UNSAFE"
         label = result[0]["label"]
         if label == "LABEL_0":
             label = "SAFE"
@@ -289,6 +292,10 @@ def get_model_output(classifier, song_id, CSV_FILE):
             label = "UNSAFE"
         else:
             label = "UNKNOWN"
+        # Append label to list for later use
+        label_list.append(label)
+
+        # Get the score
         score = result[0]["score"]
 
         verse_id = row["verse_id"]
@@ -303,9 +310,82 @@ def get_model_output(classifier, song_id, CSV_FILE):
     # 5. Save once at the end (important)
     df.to_csv(CSV_FILE, index=False)
 
-    print("Update complete")
-    return True
+    # Get overall label for the song
+    if "UNSAFE" in label_list:
+        ovr_label = "UNSAFE"
 
+    print("Update complete")
+    return ovr_label
+
+# LLM prompt for explicit songs
+def create_prompt_explicit(lyrics):
+    prompt = f"""
+    You are a helpful assistant that explains why a song is classified as explicit based on its lyrics. 
+    The song lyrics are delimited by triple quotes below. 
+    Please provide a concise explanation of which specific words, phrases, or themes in the lyrics contribute to the explicit classification. 
+    Focus on identifying content that may be considered inappropriate for younger audiences, such as profanity, sexual content, violence, or drug references.
+
+    Lyrics:
+    \"\"\"
+    {lyrics}
+    \"\"\"
+
+    Explanation:
+    """
+    return prompt
+
+# LLM prompt for non-explicit songs
+def create_prompt_nonexplicit(lyrics):
+    prompt = f"""
+    You are a helpful assistant that explains why a song is classified as non-explicit based on its lyrics. 
+    The song lyrics are delimited by triple quotes below. 
+    Please provide a concise explanation of why the lyrics do not contain content that would be considered explicit. 
+    Focus on identifying the absence of profanity, sexual content, violence, or drug references, and highlight any themes or language that contribute to the song being suitable for younger audiences.
+
+    Lyrics:
+    \"\"\"
+    {lyrics}
+    \"\"\"
+
+    Explanation:
+    """
+    return prompt
+
+# Get overall explanation from LLM
+def get_llm_explanation(song_id, CSV_FILE):
+
+    # Get song lyrics from csv file using song_id
+    df = pd.read_csv(CSV_FILE, dtype={"song_id": str}, keep_default_na=False)
+    song_row = df[df["song_id"] == str(song_id)].iloc[0]
+    llm_info = song_row.get("llm_info", "")
+
+    # Check if lyrics exist
+    if pd.isna(llm_info) or llm_info.strip() == "":
+        if CSV_FILE == "explicit.csv":
+            lyrics = song_row.get("lyrics", "")
+            prompt = create_prompt_explicit(lyrics)
+            response = ollama.chat(
+                model="llama3",   # change if needed
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            llm_info = response["message"]["content"].strip()
+        else:
+            prompt = create_prompt_nonexplicit(lyrics)
+        
+        # Save explanation to csv
+        # update_song_info(song_id, llm_info, CSV_FILE)
+
+        # Return explanation and save to csv
+        return llm_info
+        
+    else:
+        # Return existing explanation from csv
+        return llm_info
+
+   
 
 # -------------------------------- TESTING --------------------------------
 

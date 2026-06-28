@@ -222,7 +222,7 @@ def update_song_label(song_id, ovr_label, CSV_FILE):
     print(f"Updated label for Song ID {song_id}")
     return True
 
-
+# Update the label and score for a specific verse
 def update_verse_label_score(song_id, verse_id, verse_label, verse_score, CSV_FILE):
 
     # Load CSV
@@ -248,6 +248,7 @@ def update_verse_label_score(song_id, verse_id, verse_label, verse_score, CSV_FI
 
     print(f"Updated label for Song ID {song_id}, Verse ID {verse_id}")
     return True
+
 
 # Update the llm_info for a specific song.
 def update_song_info(song_id, llm_info, CSV_FILE):
@@ -318,11 +319,29 @@ def retrieve_song_info(song_id, CSV_FILE):
         }
     
 
-# Open model output CSV and set label if any in the "prediction" column is "1"
-def get_ovrlabel():
-    df = pd.read_csv("model_output.csv", keep_default_na=False)
+def retrieve_verse_info(song_id, CSV_FILE):
+    """
+    Retrieve a song's verses from the CSV file based on its ID.
 
-    if (df["label"] == "LABEL_1").any():
-        return "UNSAFE"
-    else:
-        return "SAFE"
+    Returns:
+        list of dicts containing verse details, or None if not found.
+    """
+
+    if not os.path.exists(CSV_FILE):
+        print(f"CSV file {CSV_FILE} does not exist.")
+        return None
+
+    df = pd.read_csv(CSV_FILE, dtype={"song_id": "str"}, keep_default_na=False)
+
+    song_id = str(song_id)
+
+    # Check if song exists
+    if song_id not in df["song_id"].values:
+        print(f"Song ID {song_id} not found.")
+        return None
+
+    # Retrieve all rows for the song
+    verses_df = df[df["song_id"] == song_id]
+
+    return verses_df
+
