@@ -313,6 +313,8 @@ def get_model_output(classifier, song_id, CSV_FILE):
     # Get overall label for the song
     if "UNSAFE" in label_list:
         ovr_label = "UNSAFE"
+    else:
+        ovr_label = "SAFE"
 
     print("Update complete")
     return ovr_label

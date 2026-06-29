@@ -101,6 +101,7 @@ def get_currently_playing():
             "title": current["item"]["name"],
             "artist": current["item"]["artists"][0]["name"],
             "album": current["item"]["album"]["name"],
+            "album_image": current["item"]["album"]["images"][0]["url"],
             "explicit": current["item"]["explicit"],
             "id": current["item"]["artists"][0]["id"]
         }

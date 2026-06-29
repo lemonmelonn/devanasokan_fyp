@@ -87,7 +87,7 @@ def add_explicit_song(song_id, title, artist, CSV_FILE):
         "title": title,
         "artist": artist,
         "lyrics": "",
-        "ovr_label": "",
+        "ovr_label": "UNSAFE",
         "llm_info": ""
     }
 

@@ -25,8 +25,8 @@ def currently_listening_card(track=None, error=None):
         return dbc.Card(
             dbc.CardBody([
                 html.H4("Currently Listening", className="mb-2"),
-                html.P("Unable to load the current track right now.", className="mb-1"),
-                html.Small(str(error), className="text-muted")
+                html.P("Unable to load the current track right now.", className="mb-1")
+                # html.Small(str(error), className="text-muted")
             ]),
             className="shadow-sm border-0",
             style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
@@ -52,26 +52,57 @@ def currently_listening_card(track=None, error=None):
         className="ms-2"
     )
 
+    album_image = track.get("album_image")
+
+    cover = html.Img(
+        src=album_image,
+        alt=f"{track.get('album', 'Album cover')} cover",
+        className="border"
+    ) if album_image else html.Div(
+        "No cover",
+        className="d-flex align-items-center justify-content-center text-muted bg-white border",
+        style={
+            "width": "96px",
+            "height": "96px",
+            "borderRadius": "14px"
+        }
+    )
+
+    if album_image:
+        cover.style = {
+            "width": "96px",
+            "height": "96px",
+            "objectFit": "cover",
+            "borderRadius": "14px"
+        }
+
     return dbc.Card(
-        dbc.CardBody([
+        dbc.CardBody(
             html.Div(
                 [
-                    html.H4("Currently Listening", className="mb-1"),
+                    cover,
                     html.Div(
                         [
-                            html.Span(track.get("title", "Unknown track"), className="fw-semibold fs-5"),
-                            explicit_badge,
+                            html.H4("Currently Listening", className="mb-1"),
+                            html.Div(
+                                [
+                                    html.Span(track.get("title", "Unknown track"), className="fw-semibold fs-5"),
+                                    explicit_badge,
+                                ],
+                                className="d-flex align-items-center flex-wrap",
+                            ),
+                            html.P(track.get("artist", "Unknown artist"), className="text-muted mb-1"),
+                            html.Small(
+                                f"Album: {track.get('album', 'Unknown album')}",
+                                className="text-muted"
+                            ),
                         ],
-                        className="d-flex align-items-center flex-wrap",
+                        className="flex-grow-1"
                     ),
-                    html.P(track.get("artist", "Unknown artist"), className="text-muted mb-1"),
-                    html.Small(
-                        f"Album: {track.get('album', 'Unknown album')}",
-                        className="text-muted"
-                    ),
-                ]
+                ],
+                className="d-flex align-items-center gap-3 flex-wrap"
             )
-        ]),
+        ),
         className="shadow-sm border-0",
         style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
     )
@@ -121,7 +152,7 @@ def currently_listening():
             children=currently_listening_card(),
             className="mt-4"
         ),
-        dbc.Button("Refresh song info", id="get-current-song", color="primary", className="mt-2"),
+        dbc.Button("Refresh", id="get-current-song", color="primary", className="mt-2"),
         dbc.Button("Predict", id="predict-button", color="primary", className="mt-2"),
         html.Div(
             id="song-label-output",

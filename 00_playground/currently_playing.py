@@ -24,7 +24,8 @@ def get_currently_playing():
         return {
             "song": current["item"]["name"],
             "artist": current["item"]["artists"][0]["name"],
-            "album": current["item"]["album"]["name"]
+            "album": current["item"]["album"]["name"],
+            "album_art": current["item"]["album"]["images"][0]["url"]
         }
     else:
         return None
