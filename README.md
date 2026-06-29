@@ -15,7 +15,8 @@ Unified tokenization for all models
 Design dashboard
 - Display logo (done)
 - Handle song info display when songs change (if same remain)
-- Display dataframe of verses (for nonexplicit.csv)
+- Display dataframe of verses (done)
+- Handle songs with long choruses
 
 Structure of final report
 Pipeline needs to be csv based, update line by line

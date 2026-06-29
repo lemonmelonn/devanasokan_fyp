@@ -1,6 +1,7 @@
 # callbacks.py
 import logging
 import pickle
+import re
 from unittest import result
 import pandas as pd
 import io  # Add this import
@@ -12,7 +13,7 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from urllib.parse import urlparse, parse_qs
 
-from layouts import currently_listening, currently_listening_card, song_label_card ,manual_search, song_history
+from layouts import currently_listening, currently_listening_card, song_label_card, verse_label_table, manual_search, song_history
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing
 from csv_functions import check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label, add_nonexplicit_song, add_explicit_song
@@ -94,6 +95,7 @@ def register_callbacks(app):
 
     @app.callback(
         Output("song-label-output", "children"),
+        Output("verse-table-output", "children"),
         Input("predict-button", "n_clicks")
     )
     def predict_song_label(n_clicks):
@@ -105,9 +107,11 @@ def register_callbacks(app):
             raise PreventUpdate
 
         if SONG_ID is None:
-            return html.P("No song available for prediction.")
+            return html.P("No song available for prediction."), verse_label_table()
 
         try:
+            verse_info = None
+
             # Use the loaded classifier to predict the song label
             exists = check_song_exists(SONG_ID, CSV_FILE)
 
@@ -119,40 +123,39 @@ def register_callbacks(app):
                     
                 else:
                     add_nonexplicit_song(SONG_ID, SONG_TITLE, SONG_ARTIST, CSV_FILE)
-                    def non_explicit_pipeline(title, artist, CSV_FILE):
-                        full_song = get_structured_lyrics(artist, title)
-                        # print(full_song[:100])
+                    
+                # Clean the song title to remove any text in parentheses for better lyric fetching
+                cleansongtitle = re.sub(r'\s*\(.*?\)\s*', '', SONG_TITLE)  # Remove text in parentheses
+                
+                full_song = get_structured_lyrics(SONG_ARTIST, cleansongtitle)
+                
+                split_verses(SONG_ID, full_song)        
+                text = clean_verses(SONG_ID)
 
-                        split_verses(SONG_ID, full_song)
-                        
-                        text = clean_verses(SONG_ID)
-                        print(text[:100])
+                ovr_label = get_model_output(CLASSIFIER, SONG_ID, "verselabels.csv")
+                print(f"\nOverall label for the song: {ovr_label}")
 
-                        ovr_label = get_model_output(CLASSIFIER, SONG_ID, "verselabels.csv")
-                        print(f"\nOverall label for the song: {ovr_label}")
-
-                        update_song_label(SONG_ID, ovr_label, CSV_FILE)
-                    non_explicit_pipeline(SONG_TITLE, SONG_ARTIST, CSV_FILE)
-                    verse_info = retrieve_verse_info(SONG_ID, "verselabels.csv")
+                update_song_label(SONG_ID, ovr_label, CSV_FILE)
                 
                 maininfo = retrieve_song_info(SONG_ID, CSV_FILE)
                 print(maininfo)
-                SONG_LABEL = maininfo.get("ovr_label")  # Update the global SONG_LABEL variable
                     
             # If record exists, retrieve and print details
             else:
                 print(f"Song ID {SONG_ID} already exists in {CSV_FILE}.")
                 maininfo = retrieve_song_info(SONG_ID, CSV_FILE)
-                SONG_LABEL = maininfo.get("ovr_label")  # Update the global SONG_LABEL variable
                 if SONG_EXPLICIT is False:
                     print(maininfo)
-                else:
-                    verse_info = retrieve_verse_info(SONG_ID, "verselabels.csv")
-                    print(verse_info)
-                    print(maininfo)
+
+            verse_info = retrieve_verse_info(SONG_ID, "verselabels.csv")
+            if verse_info is not None:
+                print(verse_info)
+            print(maininfo)
+
+            song_label = maininfo.get("ovr_label") if maininfo else None
 
         except Exception as exc:
             logger.exception("Failed to predict song label")
-            return song_label_card(error=exc)
+            return song_label_card(error=exc), verse_label_table(error=exc)
 
-        return song_label_card(label=SONG_LABEL)
+        return song_label_card(label=song_label), verse_label_table(verse_info=verse_info)

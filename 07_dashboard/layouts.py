@@ -47,7 +47,7 @@ def currently_listening_card(track=None, error=None):
         color="danger",
         className="ms-2"
     ) if track.get("explicit") else dbc.Badge(
-        "Clean",
+        "Not Explicit",
         color="success",
         className="ms-2"
     )
@@ -143,6 +143,92 @@ def song_label_card(label=None, error=None):
         style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
     )
 
+
+def verse_label_table(verse_info=None, error=None):
+    if error:
+        return dbc.Card(
+            dbc.CardBody([
+                html.H4("Song Verses", className="mb-2"),
+                html.P("Unable to load the verses for this song right now.", className="mb-1"),
+                html.Small(str(error), className="text-muted")
+            ]),
+            className="shadow-sm border-0",
+            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+        )
+
+    if verse_info is None or len(verse_info) == 0:
+        return dbc.Card(
+            dbc.CardBody([
+                html.H4("Song Verses", className="mb-2"),
+                html.P("No verses are available for this song yet.", className="mb-0")
+            ]),
+            className="shadow-sm border-0",
+            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+        )
+
+    display_columns = ["ori_verse", "label", "score"]
+    table_data = verse_info.copy()
+
+    for column in display_columns:
+        if column not in table_data.columns:
+            table_data[column] = ""
+
+    table_data = table_data[display_columns].fillna("")
+
+    table = dash_table.DataTable(
+        columns=[
+            {"name": "Verse", "id": "ori_verse"},
+            {"name": "Label", "id": "label"},
+            {"name": "Confidence", "id": "score"},
+        ],
+        data=table_data.to_dict("records"),
+        style_table={
+            "overflowX": "auto",
+            "maxHeight": "420px",
+            "overflowY": "auto",
+        },
+        style_header={
+            "backgroundColor": "#e9ecef",
+            "fontWeight": "600",
+            "border": "none",
+        },
+        style_cell={
+            "textAlign": "left",
+            "whiteSpace": "pre-line",
+            "height": "auto",
+            "padding": "12px",
+            "backgroundColor": "#f8f9fa",
+            "border": "none",
+            "fontSize": "14px",
+            "overflowWrap": "anywhere",
+        },
+        style_data_conditional=[
+            {
+                "if": {"column_id": "label"},
+                "fontWeight": "600",
+                "width": "120px",
+            },
+            {
+                "if": {"column_id": "score"},
+                "width": "110px",
+            },
+            {
+                "if": {"column_id": "ori_verse"},
+                "width": "auto",
+            },
+        ],
+        fixed_rows={"headers": True},
+    )
+
+    return dbc.Card(
+        dbc.CardBody([
+            html.H4("Song Verses", className="mb-3"),
+            table,
+        ]),
+        className="shadow-sm border-0",
+        style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+    )
+
 def currently_listening():
     return html.Div([
         html.H1("Currently Listening", className="mb-4"),
@@ -153,11 +239,25 @@ def currently_listening():
             className="mt-4"
         ),
         dbc.Button("Refresh", id="get-current-song", color="primary", className="mt-2"),
-        dbc.Button("Predict", id="predict-button", color="primary", className="mt-2"),
-        html.Div(
-            id="song-label-output",
-            children=song_label_card(),
-            className="mt-4"
+        dbc.Button("Get Report", id="predict-button", color="primary", className="mt-2"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        id="song-label-output",
+                        children=song_label_card(),
+                    ),
+                    md=4,
+                ),
+                dbc.Col(
+                    html.Div(
+                        id="verse-table-output",
+                        children=verse_label_table(),
+                    ),
+                    md=8,
+                ),
+            ],
+            className="mt-4 g-3",
         ),
     ])
 
