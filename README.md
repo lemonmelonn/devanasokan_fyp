@@ -12,7 +12,7 @@ Unified tokenization for all models
 
 ### To Do
 
-- Tuning for other 3 models
+- Tuning for other 3 models (need to test)
 - Find optimal hyperparameter range
 - Understand what is hidden size and attention heads in Bert and Distilbert
 
