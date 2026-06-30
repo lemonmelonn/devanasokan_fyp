@@ -13,6 +13,8 @@ Unified tokenization for all models
 ### To Do
 
 - Tuning for other 3 models
+- Find optimal hyperparameter range
+- Understand what is hidden size and attention heads in Bert and Distilbert
 
 Design dashboard
 - Display logo (done)
