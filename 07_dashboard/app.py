@@ -13,9 +13,9 @@ app = Dash(
     __name__,
     suppress_callback_exceptions=True,
     external_stylesheets=[
-        dbc.themes.FLATLY,
+        dbc.themes.DARKLY,
         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
-        "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
         "https://cdn.jsdelivr.net/npm/ag-grid-community@30/styles/ag-grid.css",
         "https://cdn.jsdelivr.net/npm/ag-grid-community@30/styles/ag-theme-alpine.css",
     ],

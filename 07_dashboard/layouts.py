@@ -8,12 +8,13 @@ from datetime import date, timedelta
 
 def dashboard_menu():
     return dbc.NavbarSimple(
-        brand="Dashboard",
+        brand="Song Safeness Dashboard",
         color="primary",
         dark=True,
         fluid=True,
+        className="dashboard-navbar",
         children=[
-            dbc.NavItem(dbc.NavLink("Currently Listening", href="/currently-listening")),
+            dbc.NavItem(dbc.NavLink("Song Classification", href="/currently-listening")),
             dbc.NavItem(dbc.NavLink("Manual Search", href="/manual-search")),
             dbc.NavItem(dbc.NavLink("Song History", href="/song-history")),
         ],
@@ -24,22 +25,20 @@ def currently_listening_card(track=None, error=None):
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Currently Listening", className="mb-2"),
-                html.P("Unable to load the current track right now.", className="mb-1")
+                html.H4("Currently Listening", className="section-header mb-2"),
+                html.P("Unable to load the current track right now.", className="section-body mb-1")
                 # html.Small(str(error), className="text-muted")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     if not track:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Currently Listening", className="mb-2"),
-                html.P("No song is currently playing.", className="mb-0")
+                html.H4("Currently Listening", className="section-header mb-2"),
+                html.P("No song is currently playing.", className="section-body mb-0")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     explicit_badge = dbc.Badge(
@@ -57,24 +56,11 @@ def currently_listening_card(track=None, error=None):
     cover = html.Img(
         src=album_image,
         alt=f"{track.get('album', 'Album cover')} cover",
-        className="border"
+        className="dashboard-cover"
     ) if album_image else html.Div(
         "No cover",
-        className="d-flex align-items-center justify-content-center text-muted bg-white border",
-        style={
-            "width": "96px",
-            "height": "96px",
-            "borderRadius": "14px"
-        }
+        className="dashboard-cover dashboard-cover--placeholder d-flex align-items-center justify-content-center"
     )
-
-    if album_image:
-        cover.style = {
-            "width": "96px",
-            "height": "96px",
-            "objectFit": "cover",
-            "borderRadius": "14px"
-        }
 
     return dbc.Card(
         dbc.CardBody(
@@ -83,18 +69,18 @@ def currently_listening_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H4("Currently Listening", className="mb-1"),
+                            html.H4("Currently Listening", className="section-header mb-1"),
                             html.Div(
                                 [
-                                    html.Span(track.get("title", "Unknown track"), className="fw-semibold fs-5"),
+                                    html.Span(track.get("title", "Unknown track"), className="track-title"),
                                     explicit_badge,
                                 ],
                                 className="d-flex align-items-center flex-wrap",
                             ),
-                            html.P(track.get("artist", "Unknown artist"), className="text-muted mb-1"),
+                            html.P(track.get("artist", "Unknown artist"), className="section-body mb-1"),
                             html.Small(
                                 f"Album: {track.get('album', 'Unknown album')}",
-                                className="text-muted"
+                                className="section-meta"
                             ),
                         ],
                         className="flex-grow-1"
@@ -103,8 +89,7 @@ def currently_listening_card(track=None, error=None):
                 className="d-flex align-items-center gap-3 flex-wrap"
             )
         ),
-        className="shadow-sm border-0",
-        style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+        className="dashboard-card shadow-sm border-0"
     )
 
 # Card for displaying the song label
@@ -112,35 +97,32 @@ def song_label_card(label=None, error=None):
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Label", className="mb-2"),
-                html.P("Unable to determine the song label right now.", className="mb-1"),
-                html.Small(str(error), className="text-muted")
+                html.H4("Song Label", className="section-header mb-2"),
+                html.P("Unable to determine the song label right now.", className="section-body mb-1"),
+                html.Small(str(error), className="section-meta")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     if not label:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Label", className="mb-2"),
-                html.P("No label has been determined for the current song.", className="mb-0")
+                html.H4("Song Label", className="section-header mb-2"),
+                html.P("No label has been determined for the current song.", className="section-body mb-0")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     return dbc.Card(
         dbc.CardBody([
             html.Div(
                 [
-                    html.H4("Song Label", className="mb-1"),
-                    html.P(label, className="fw-semibold fs-5 mb-0"),
+                    html.H4("Song Label", className="section-header mb-1"),
+                    html.P(label, className="label-value mb-0"),
                 ]
             )
         ]),
-        className="shadow-sm border-0",
-        style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+        className="dashboard-card shadow-sm border-0"
     )
 
 
@@ -148,22 +130,20 @@ def verse_label_table(verse_info=None, error=None):
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Verses", className="mb-2"),
-                html.P("Unable to load the verses for this song right now.", className="mb-1"),
-                html.Small(str(error), className="text-muted")
+                html.H4("Song Verses", className="section-header mb-2"),
+                html.P("Unable to load the verses for this song right now.", className="section-body mb-1"),
+                html.Small(str(error), className="section-meta")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     if verse_info is None or len(verse_info) == 0:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Verses", className="mb-2"),
-                html.P("No verses are available for this song yet.", className="mb-0")
+                html.H4("Song Verses", className="section-header mb-2"),
+                html.P("No verses are available for this song yet.", className="section-body mb-0")
             ]),
-            className="shadow-sm border-0",
-            style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+            className="dashboard-card shadow-sm border-0"
         )
 
     display_columns = ["ori_verse", "label", "score"]
@@ -182,64 +162,34 @@ def verse_label_table(verse_info=None, error=None):
             {"name": "Confidence", "id": "score"},
         ],
         data=table_data.to_dict("records"),
-        style_table={
-            "overflowX": "auto",
-            "maxHeight": "420px",
-            "overflowY": "auto",
-        },
-        style_header={
-            "backgroundColor": "#e9ecef",
-            "fontWeight": "600",
-            "border": "none",
-        },
-        style_cell={
-            "textAlign": "left",
-            "whiteSpace": "pre-line",
-            "height": "auto",
-            "padding": "12px",
-            "backgroundColor": "#f8f9fa",
-            "border": "none",
-            "fontSize": "14px",
-            "overflowWrap": "anywhere",
-        },
-        style_data_conditional=[
-            {
-                "if": {"column_id": "label"},
-                "fontWeight": "600",
-                "width": "120px",
-            },
-            {
-                "if": {"column_id": "score"},
-                "width": "110px",
-            },
-            {
-                "if": {"column_id": "ori_verse"},
-                "width": "auto",
-            },
-        ],
+        className="dashboard-table",
         fixed_rows={"headers": True},
     )
 
     return dbc.Card(
         dbc.CardBody([
-            html.H4("Song Verses", className="mb-3"),
+            html.H4("Song Verses", className="section-header mb-3"),
             table,
         ]),
-        className="shadow-sm border-0",
-        style={"borderRadius": "16px", "backgroundColor": "#f8f9fa"}
+        className="dashboard-card shadow-sm border-0"
     )
 
 def currently_listening():
     return html.Div([
-        html.H1("Currently Listening", className="mb-4"),
-        html.P("This page shows the currently playing song and related information."),
+        html.H1("Currently Listening", className="page-title mb-4"),
+        html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
         html.Div(
             id="currently-listening-content",
             children=currently_listening_card(),
-            className="mt-4"
+            className="content-stack mt-4"
         ),
-        dbc.Button("Refresh", id="get-current-song", color="primary", className="mt-2"),
-        dbc.Button("Get Report", id="predict-button", color="primary", className="mt-2"),
+        html.Div(
+            [
+                dbc.Button("Refresh", id="get-current-song", color="primary", className="dashboard-button"),
+                dbc.Button("Get Report", id="predict-button", color="primary", className="dashboard-button"),
+            ],
+            className="button-row mt-2"
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -259,29 +209,29 @@ def currently_listening():
             ],
             className="mt-4 g-3",
         ),
-    ])
+    ], className="dashboard-page")
 
 # Manual Search Layout
 def manual_search():
     return html.Div([
-        html.H1("Manual Search", className="mb-4"),
-        html.P("This page will allow users to perform manual searches.")
-    ])
+        html.H1("Graphs?", className="page-title mb-4"),
+        html.P("This page will allow users to perform manual searches.", className="page-subtitle")
+    ], className="dashboard-page")
 
 # History Layout
 def song_history():
     return html.Div([
-        html.H1("Song History", className="mb-4"),
-        html.P("This page will display the history of songs played.")
-    ])
+        html.H1("Song History", className="page-title mb-4"),
+        html.P("This page will display the history of songs played.", className="page-subtitle")
+    ], className="dashboard-page")
 
 
 def create_app_layout():
     return dmc.MantineProvider(
-        theme={"colorScheme": "light"},
+        theme={"colorScheme": "dark"},
         children=[
             dcc.Location(id="url", refresh=False),
             dashboard_menu(),
-            html.Div(id="page-container")
+            html.Div(id="page-container", className="dashboard-container")
         ]
     )

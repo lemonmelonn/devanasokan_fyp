@@ -56,7 +56,7 @@ def register_callbacks(app):
         if pathname == "/manual-search":
             return manual_search()
         
-        return html.Div("404: Page not found", style={"padding": "2rem"})
+        return html.Div("404: Page not found", className="dashboard-page")
     
     @app.callback(
         Output("currently-listening-content", "children"),
