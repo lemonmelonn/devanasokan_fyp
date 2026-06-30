@@ -205,9 +205,23 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-Brenstom.docx
-search_results.csv
-noexplicit.csv
-IR Structure.docx
+
+# Folders
+chunks/
+datasource/
+docs/
+preparation/
 storage/
-kagglesongs/
+huggingface_cache/
+my_bert_models/
+
+05_model_training/my_final_model/
+05_model_training/my_final_bert/
+05_model_training/lstm_artifacts/
+05_model_training/lstm_lyrics_classifier.pt
+05_model_training/rnn_artifacts
+05_model_training/rnn_lyrics_classifier.pt
+05_model_training/results/
+
+# CSV Files
+*.csv
