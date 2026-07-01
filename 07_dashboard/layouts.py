@@ -155,15 +155,17 @@ def verse_label_table(verse_info=None, error=None):
 
     table_data = table_data[display_columns].fillna("")
 
-    table = dash_table.DataTable(
-        columns=[
-            {"name": "Verse", "id": "ori_verse"},
-            {"name": "Label", "id": "label"},
-            {"name": "Confidence", "id": "score"},
-        ],
-        data=table_data.to_dict("records"),
+    table = html.Div(
+        dash_table.DataTable(
+            columns=[
+                {"name": "Verse", "id": "ori_verse"},
+                {"name": "Label", "id": "label"},
+                {"name": "Confidence", "id": "score"},
+            ],
+            data=table_data.to_dict("records"),
+            fixed_rows={"headers": True},
+        ),
         className="dashboard-table",
-        fixed_rows={"headers": True},
     )
 
     return dbc.Card(
