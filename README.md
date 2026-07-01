@@ -10,17 +10,22 @@ Length of verses, maximum length
 Proper LSTM approach
 Unified tokenization for all models
 
-### To Do
+### To Do (Components)
 
+--- Model Training
 - Tuning for other 3 models (need to test)
 - Find optimal hyperparameter range
 - Understand what is hidden size and attention heads in Bert and Distilbert
 
-Design dashboard
-- Display logo (done)
+--- Manual Search Modal
+- Button for manual search (opens modal)
+- Update global variables after click song
+- Adjust modal size (make it less wide)
+- idk
+
+--- Touch Up
 - Handle song info (label and verses) display when songs change, if same remain
 - Adjust width of column header (later, once all features are finalized)
-- Button for manual search (opens modal)
 - Display dataframe of verses (done)
 - Handle songs with long choruses
 

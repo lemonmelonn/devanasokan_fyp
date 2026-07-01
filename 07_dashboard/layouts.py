@@ -224,20 +224,50 @@ def currently_listening():
             className="mt-4 g-3",
         ),
         
+        dcc.Store(id="search-results-store"),
+        dcc.Store(id="selected-song"),
+
         dbc.Modal(
-        [
-            dbc.ModalHeader("Manual Search"),
-            dbc.ModalBody([
-                dcc.Input(id="input-song-name", placeholder="Song name"),
-                dcc.Input(id="input-artist", placeholder="Artist"),
-            ]),
-            dbc.ModalFooter(
-                dbc.Button("Search", id="search-song", color="primary")
-            )
-        ],
-        id="manual-search-modal",
-        is_open=False
-    )
+            [
+                dbc.ModalHeader("Manual Search"),
+
+                dbc.ModalBody([
+                    dcc.Input(
+                        id="input-song-name",
+                        type="text",
+                        placeholder="Search Spotify...",
+                        style={"width": "100%", "height": "40px", "padding": "0 10px", "border-radius": "5px", "border": "1px solid #ccc"},
+                        debounce=True,
+                        className="search-input"
+                    ),
+
+                    html.Hr(),
+
+                    html.Div(
+                        "Results",
+                        className="modal-section-title"
+                    ),
+
+                    html.Div(
+                        id="search-results",
+                        className="search-results"
+                    )
+
+                    
+
+                ]),
+
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="close-search", color="primary")
+                )
+            ],
+
+            id="manual-search-modal",
+            is_open=False,
+            size="lg",
+            centered=True,
+            scrollable=True,
+        )
     ], className="dashboard-page")
 
 # Graphs Layout

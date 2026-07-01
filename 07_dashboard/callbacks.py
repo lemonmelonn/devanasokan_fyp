@@ -7,7 +7,7 @@ import pandas as pd
 import io  # Add this import
 import os  # Add this import for environment variables
 from datetime import date, datetime, timedelta
-from dash import Input, Output, State, callback, callback_context, html, dcc, dash_table, dash
+from dash import Input, Output, State, callback, callback_context, ALL, ctx, html, dcc, dash_table, dash, no_update
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
@@ -15,10 +15,12 @@ from urllib.parse import urlparse, parse_qs
 
 from layouts import currently_listening, currently_listening_card, song_label_card, verse_label_table, graphs, song_history
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
-from spotify_functions import get_access_token, get_currently_playing
+from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
 from csv_functions import check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label, add_nonexplicit_song, add_explicit_song
 
 logger = logging.getLogger(__name__)
+
+print(ALL)
 
 # Load the classifier model and get the Spotify access token
 CLASSIFIER = load_model()
@@ -181,3 +183,94 @@ def register_callbacks(app):
     )
     def close_modal(n, is_open):
         return False
+    
+    @callback(
+        Output("search-results-store", "data"),
+        Output("search-results", "children"),
+        Input("input-song-name", "value"),
+        prevent_initial_call=True
+    )
+    def update_search_results(query):
+
+        if not query or len(query.strip()) < 2:
+            return [], []
+
+        songs = search_possible_songs(query)
+
+        cards = []
+
+        for i, song in enumerate(songs):
+
+            cards.append(
+                html.Div(
+                    id={
+                        "type": "song-card",
+                        "index": i
+                    },
+                    n_clicks=0,
+                    className="song-card",
+                    children=[
+
+                        # LEFT: album cover
+                        html.Img(
+                            src=song["album_cover"],
+                            className="song-card-img"
+                        ),
+
+                        # RIGHT: details
+                        html.Div(
+                            className="song-card-info",
+                            children=[
+
+                                html.Div(song["title"], className="song-title"),
+                                html.Div(song["artist"], className="song-artist"),
+                                html.Div(song["album"], className="song-album"),
+                            ]
+                        )
+                    ]
+                )
+            )
+
+        return songs, cards
+    
+
+    @callback(
+        Output("selected-song", "data"),
+        Output("manual-search-modal", "is_open", allow_duplicate=True),
+        Input({"type": "song-card", "index": ALL}, "n_clicks"),
+        State("search-results-store", "data"),
+        prevent_initial_call=True
+    )
+    def select_song(n_clicks_list, songs):
+
+        # nothing stored yet
+        if not songs:
+            return no_update, no_update
+
+        triggered = ctx.triggered_id
+
+        # must be a real card click
+        if not triggered or not isinstance(triggered, dict):
+            return no_update, no_update
+
+        if triggered.get("type") != "song-card":
+            return no_update, no_update
+        
+        index = triggered["index"]
+
+        # safety: ignore empty clicks
+        if not n_clicks_list or all(v is None or v == 0 for v in n_clicks_list):
+            return no_update, no_update
+
+        selected = songs[index]
+
+        print(f"Selected song: {selected['title']} by {selected['artist']}")
+
+        return {
+            "song_id": selected["song_id"],
+            "title": selected["title"],
+            "artist": selected["artist"],
+            "album": selected["album"],
+            "album_cover": selected["album_cover"],
+            "explicit": selected["explicit"]
+        }, False

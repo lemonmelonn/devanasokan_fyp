@@ -270,3 +270,92 @@ a {
     width: 100%;
   }
 }
+
+
+.song-card{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px;
+    border-radius:12px;
+    background:#1E293B;
+    cursor:pointer;
+    transition:0.2s ease;
+}
+
+.song-card:hover{
+    background:#273449;
+    transform:scale(1.01);
+}
+
+.song-card-img{
+    width:60px;
+    height:60px;
+
+    border-radius:8px;
+    object-fit:cover;
+    flex-shrink:0;
+}
+
+.song-card-info{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.song-title{
+    font-size:15px;
+    font-weight:600;
+    color:#F9FAFB;
+}
+
+.song-artist{
+    font-size:13px;
+    color:#CBD5E1;
+}
+
+.song-album{
+    font-size:12px;
+    color:#94A3B8;
+}
+
+.search-input{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+}
+
+
+.search-input{
+    width:100%;
+    padding:12px 16px;
+
+    background:#111827;
+    color:#F9FAFB;
+
+    border:1px solid #374151;
+    border-radius:10px;
+
+    font-size:16px;
+}
+
+.search-input:focus{
+    outline:none;
+    border-color:#3B82F6;
+}
+
+.modal-section-title{
+    color:#CBD5E1;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.search-results{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    max-height:400px;
+    overflow-y:auto;
+}

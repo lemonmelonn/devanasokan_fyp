@@ -40,7 +40,7 @@ sp = Spotify(auth_manager=SpotifyOAuth(
 #     print(f"{idx}. {track['title']} -- {track['artist']} -- '{track['album']}'")
 
 
-def search_songs_spotify(query, limit=10):
+def search_possible_songs(query, limit=5):
     """
     Search songs using Spotify API
     Returns list formatted for Dash dropdown
@@ -56,20 +56,19 @@ def search_songs_spotify(query, limit=10):
     formatted = []
 
     for item in items:
-        song_name = item["name"]
-        song_explicit = item["explicit"]
 
         formatted.append({
             "song_id": item["id"],
-            "title": song_name,
+            "title": item["name"],
             "artist": item["artists"][0]["name"],
             "album": item["album"]["name"],
-            "explicit": song_explicit
+            "album_cover": item["album"]["images"][0]["url"] if item["album"]["images"] else None,
+            "explicit": item["explicit"]
         })
 
     return formatted
 
 
-search_results = search_songs_spotify("Shape of You")
+search_results = search_possible_songs("One of your Girls")
 for result in search_results:
-    print(f"ID: {result['song_id']} (Title: {result['title']}, Artist: {result['artist']}, Album: {result['album']}, Explicit: {result['explicit']})")
+    print(result)
