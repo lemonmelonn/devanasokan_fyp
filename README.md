@@ -18,7 +18,9 @@ Unified tokenization for all models
 
 Design dashboard
 - Display logo (done)
-- Handle song info (label and verses) display when songs change (if same remain)
+- Handle song info (label and verses) display when songs change, if same remain
+- Adjust width of column header (later, once all features are finalized)
+- Button for manual search (opens modal)
 - Display dataframe of verses (done)
 - Handle songs with long choruses
 

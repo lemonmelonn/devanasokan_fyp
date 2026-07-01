@@ -157,6 +157,39 @@ a {
   transform: translateY(0);
 }
 
+.dashboard-html-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard-html-table th,
+.dashboard-html-table td {
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: top;
+  text-align: left;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-html-table th {
+  background: rgba(15, 23, 42, 0.95);
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.dashboard-html-table tbody tr:nth-child(odd) {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.dashboard-html-table tbody tr:nth-child(even) {
+  background: rgba(30, 41, 59, 0.65);
+}
+
 .dashboard-table .dash-spreadsheet-container,
 .dashboard-table .dash-spreadsheet-inner,
 .dashboard-table .dash-cell,

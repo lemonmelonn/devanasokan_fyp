@@ -1,5 +1,5 @@
 # layouts.py
-from dash import html, dcc, dash_table
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from datetime import date, timedelta
@@ -15,7 +15,7 @@ def dashboard_menu():
         className="dashboard-navbar",
         children=[
             dbc.NavItem(dbc.NavLink("Song Classification", href="/currently-listening")),
-            dbc.NavItem(dbc.NavLink("Manual Search", href="/manual-search")),
+            dbc.NavItem(dbc.NavLink("Graphs", href="/graphs")),
             dbc.NavItem(dbc.NavLink("Song History", href="/song-history")),
         ],
     )
@@ -35,7 +35,7 @@ def currently_listening_card(track=None, error=None):
     if not track:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Currently Listening", className="section-header mb-2"),
+                html.H4("Listening", className="section-header mb-2"),
                 html.P("No song is currently playing.", className="section-body mb-0")
             ]),
             className="dashboard-card shadow-sm border-0"
@@ -155,16 +155,27 @@ def verse_label_table(verse_info=None, error=None):
 
     table_data = table_data[display_columns].fillna("")
 
+    header = html.Thead(
+        html.Tr([
+            html.Th("Verse"),
+            html.Th("Label"),
+            html.Th("Confidence"),
+        ])
+    )
+
+    body = html.Tbody([
+        html.Tr(
+            [
+                html.Td(str(row["ori_verse"])),
+                html.Td(str(row["label"])),
+                html.Td(str(row["score"])),
+            ]
+        )
+        for _, row in table_data.iterrows()
+    ])
+
     table = html.Div(
-        dash_table.DataTable(
-            columns=[
-                {"name": "Verse", "id": "ori_verse"},
-                {"name": "Label", "id": "label"},
-                {"name": "Confidence", "id": "score"},
-            ],
-            data=table_data.to_dict("records"),
-            fixed_rows={"headers": True},
-        ),
+        html.Table([header, body], className="dashboard-html-table"),
         className="dashboard-table",
     )
 
@@ -178,7 +189,7 @@ def verse_label_table(verse_info=None, error=None):
 
 def currently_listening():
     return html.Div([
-        html.H1("Currently Listening", className="page-title mb-4"),
+        html.H1("Song Classification", className="page-title mb-4"),
         html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
         html.Div(
             id="currently-listening-content",
@@ -187,7 +198,8 @@ def currently_listening():
         ),
         html.Div(
             [
-                dbc.Button("Refresh", id="get-current-song", color="primary", className="dashboard-button"),
+                dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button"),
+                dbc.Button("Spotify", id="get-current-song", color="primary", className="dashboard-button"),
                 dbc.Button("Get Report", id="predict-button", color="primary", className="dashboard-button"),
             ],
             className="button-row mt-2"
@@ -211,13 +223,28 @@ def currently_listening():
             ],
             className="mt-4 g-3",
         ),
+        
+        dbc.Modal(
+        [
+            dbc.ModalHeader("Manual Search"),
+            dbc.ModalBody([
+                dcc.Input(id="input-song-name", placeholder="Song name"),
+                dcc.Input(id="input-artist", placeholder="Artist"),
+            ]),
+            dbc.ModalFooter(
+                dbc.Button("Search", id="search-song", color="primary")
+            )
+        ],
+        id="manual-search-modal",
+        is_open=False
+    )
     ], className="dashboard-page")
 
-# Manual Search Layout
-def manual_search():
+# Graphs Layout
+def graphs():
     return html.Div([
-        html.H1("Graphs?", className="page-title mb-4"),
-        html.P("This page will allow users to perform manual searches.", className="page-subtitle")
+        html.H1("Graphs", className="page-title mb-4"),
+        html.P("This page will display various graphs and visualizations.", className="page-subtitle")
     ], className="dashboard-page")
 
 # History Layout

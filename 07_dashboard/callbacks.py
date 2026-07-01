@@ -13,7 +13,7 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from urllib.parse import urlparse, parse_qs
 
-from layouts import currently_listening, currently_listening_card, song_label_card, verse_label_table, manual_search, song_history
+from layouts import currently_listening, currently_listening_card, song_label_card, verse_label_table, graphs, song_history
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing
 from csv_functions import check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label, add_nonexplicit_song, add_explicit_song
@@ -53,9 +53,9 @@ def register_callbacks(app):
         if pathname == "/currently-listening":
             return currently_listening()
 
-        if pathname == "/manual-search":
-            return manual_search()
-        
+        if pathname == "/graphs":
+            return graphs()
+
         return html.Div("404: Page not found", className="dashboard-page")
     
     @app.callback(
@@ -159,3 +159,25 @@ def register_callbacks(app):
             return song_label_card(error=exc), verse_label_table(error=exc)
 
         return song_label_card(label=song_label), verse_label_table(verse_info=verse_info)
+    
+
+    # Try manual search modal callbacks
+    @callback(
+        Output("manual-search-modal", "is_open"),
+        Input("manual-search-button", "n_clicks"),
+        State("manual-search-modal", "is_open"),
+        prevent_initial_call=True
+    )
+    def toggle_modal(n, is_open):
+        return not is_open
+    
+
+
+    @callback(
+        Output("manual-search-modal", "is_open", allow_duplicate=True),
+        Input("search-song", "n_clicks"),
+        State("manual-search-modal", "is_open"),
+        prevent_initial_call=True
+    )
+    def close_modal(n, is_open):
+        return False
