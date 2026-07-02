@@ -20,12 +20,16 @@ def dashboard_menu():
         ],
     )
 
-# Currently Listening Layout
-def currently_listening_card(track=None, error=None):
+# Song Card Layout (Handles both currently listening and manual search results)
+def song_card(track=None, error=None):
+
+    method = track.get("method") if track else "Currently Listening"
+    print("Album cover:", track.get("album_image") if track else "No track data")
+
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Currently Listening", className="section-header mb-2"),
+                html.H4(method, className="section-header mb-2"),
                 html.P("Unable to load the current track right now.", className="section-body mb-1")
                 # html.Small(str(error), className="text-muted")
             ]),
@@ -35,12 +39,13 @@ def currently_listening_card(track=None, error=None):
     if not track:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Listening", className="section-header mb-2"),
+                html.H4(method, className="section-header mb-2"),
                 html.P("No song is currently playing.", className="section-body mb-0")
             ]),
             className="dashboard-card shadow-sm border-0"
         )
 
+    # Create the explicit badge based on the track's explicit status
     explicit_badge = dbc.Badge(
         "Explicit",
         color="danger",
@@ -51,6 +56,7 @@ def currently_listening_card(track=None, error=None):
         className="ms-2"
     )
 
+    # Display album cover
     album_image = track.get("album_image")
 
     cover = html.Img(
@@ -62,6 +68,7 @@ def currently_listening_card(track=None, error=None):
         className="dashboard-cover dashboard-cover--placeholder d-flex align-items-center justify-content-center"
     )
 
+    # Return the card with track details
     return dbc.Card(
         dbc.CardBody(
             html.Div(
@@ -69,7 +76,7 @@ def currently_listening_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H4("Currently Listening", className="section-header mb-1"),
+                            html.H4(method, className="section-header mb-1"),
                             html.Div(
                                 [
                                     html.Span(track.get("title", "Unknown track"), className="track-title"),
@@ -113,6 +120,7 @@ def song_label_card(label=None, error=None):
             className="dashboard-card shadow-sm border-0"
         )
 
+    # Return the card with the song label
     return dbc.Card(
         dbc.CardBody([
             html.Div(
@@ -125,7 +133,7 @@ def song_label_card(label=None, error=None):
         className="dashboard-card shadow-sm border-0"
     )
 
-
+# Card for displaying the verse label table
 def verse_label_table(verse_info=None, error=None):
     if error:
         return dbc.Card(
@@ -179,6 +187,7 @@ def verse_label_table(verse_info=None, error=None):
         className="dashboard-table",
     )
 
+    # Return the card with the verse table
     return dbc.Card(
         dbc.CardBody([
             html.H4("Song Verses", className="section-header mb-3"),
@@ -187,13 +196,14 @@ def verse_label_table(verse_info=None, error=None):
         className="dashboard-card shadow-sm border-0"
     )
 
-def currently_listening():
+# Song Classification Page Layout
+def song_classification_page():
     return html.Div([
         html.H1("Song Classification", className="page-title mb-4"),
         html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
         html.Div(
             id="currently-listening-content",
-            children=currently_listening_card(),
+            children=song_card(),
             className="content-stack mt-4"
         ),
         html.Div(
@@ -284,7 +294,7 @@ def song_history():
         html.P("This page will display the history of songs played.", className="page-subtitle")
     ], className="dashboard-page")
 
-
+# App Layout
 def create_app_layout():
     return dmc.MantineProvider(
         theme={"colorScheme": "dark"},

@@ -13,14 +13,14 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from urllib.parse import urlparse, parse_qs
 
-from layouts import currently_listening, currently_listening_card, song_label_card, verse_label_table, graphs, song_history
+from layouts import song_card, song_classification_page, song_label_card, verse_label_table, graphs, song_history
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
 from csv_functions import check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label, add_nonexplicit_song, add_explicit_song
 
 logger = logging.getLogger(__name__)
 
-print(ALL)
+# print(ALL)
 
 # Load the classifier model and get the Spotify access token
 CLASSIFIER = load_model()
@@ -47,13 +47,13 @@ def register_callbacks(app):
 
         if pathname == "/":
             print("Redirecting to /currently-listening")
-            return currently_listening()
+            return song_classification_page()
 
         if pathname == "/song-history":
             return song_history()
         
         if pathname == "/currently-listening":
-            return currently_listening()
+            return song_classification_page()
 
         if pathname == "/graphs":
             return graphs()
@@ -85,14 +85,20 @@ def register_callbacks(app):
             else:
                 CSV_FILE = "nonexplicit.csv"
 
+            # Add method to track details
+            current_track["method"] = "Currently Listening"
+
+            # Print selected song details for debugging
+            print(f"\n[DEBUG] Current song: {current_track['title']} by {current_track['artist']}")
+
             # Print global variables for debugging
-            logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, CSV_FILE={CSV_FILE}")
+            logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, CSV_FILE={CSV_FILE}\n")
 
         except Exception as exc:
             logger.exception("Failed to fetch currently playing track")
-            return currently_listening_card(error=exc)
+            return song_card(error=exc)
 
-        return currently_listening_card(current_track)
+        return song_card(current_track)
     
 
     @app.callback(
@@ -135,7 +141,7 @@ def register_callbacks(app):
                 text = clean_verses(SONG_ID)
 
                 ovr_label = get_model_output(CLASSIFIER, SONG_ID, "verselabels.csv")
-                print(f"\nOverall label for the song: {ovr_label}")
+                logger.info(f"Overall label for the song: {ovr_label}")
 
                 update_song_label(SONG_ID, ovr_label, CSV_FILE)
                 
@@ -237,6 +243,8 @@ def register_callbacks(app):
     @callback(
         Output("selected-song", "data"),
         Output("manual-search-modal", "is_open", allow_duplicate=True),
+        Output("currently-listening-content", "children", allow_duplicate=True),
+        Output("input-song-name", "value"),
         Input({"type": "song-card", "index": ALL}, "n_clicks"),
         State("search-results-store", "data"),
         prevent_initial_call=True
@@ -245,32 +253,57 @@ def register_callbacks(app):
 
         # nothing stored yet
         if not songs:
-            return no_update, no_update
+            return no_update, no_update, no_update, no_update
 
         triggered = ctx.triggered_id
 
         # must be a real card click
         if not triggered or not isinstance(triggered, dict):
-            return no_update, no_update
+            return no_update, no_update, no_update, no_update
 
         if triggered.get("type") != "song-card":
-            return no_update, no_update
-        
+            return no_update, no_update, no_update, no_update
+
         index = triggered["index"]
 
         # safety: ignore empty clicks
         if not n_clicks_list or all(v is None or v == 0 for v in n_clicks_list):
-            return no_update, no_update
+            return no_update, no_update, no_update, no_update
 
         selected = songs[index]
 
-        print(f"Selected song: {selected['title']} by {selected['artist']}")
+        # Update global variables with song details
+        global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT, CSV_FILE
+        SONG_ID = selected.get("song_id")
+        SONG_TITLE = selected.get("title")
+        SONG_ARTIST = selected.get("artist")
+        SONG_EXPLICIT = selected.get("explicit")
+        CSV_FILE = None
 
+        if SONG_EXPLICIT is True:
+            CSV_FILE = "explicit.csv"
+        else:
+            CSV_FILE = "nonexplicit.csv"
+
+        # Add method to track details
+        selected["method"] = "Manual Search"
+
+        # Rename album_cover to album_image for consistency
+        selected["album_image"] = selected.pop("album_cover", None)
+
+        # Print selected song details for debugging
+        print(f"\n[DEBUG] Selected song: {selected['title']} by {selected['artist']}")
+
+        # Print global variables for debugging
+        logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, CSV_FILE={CSV_FILE}\n")
+
+        # Return output
         return {
             "song_id": selected["song_id"],
             "title": selected["title"],
             "artist": selected["artist"],
             "album": selected["album"],
-            "album_cover": selected["album_cover"],
-            "explicit": selected["explicit"]
-        }, False
+            "album_image": selected["album_image"],
+            "explicit": selected["explicit"],
+            "method": selected["method"]
+        }, False, song_card(selected), ""
