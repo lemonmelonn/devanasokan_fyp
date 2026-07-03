@@ -21,6 +21,10 @@ Unified tokenization for all models
 
 --- General
 - Add callback to clear song label and song verses if global variables change
+- Make only one csv for both explicit and non-explicit songs
+- See why cannot use LLM/ find out if still can use
+- Make sure each song only has one set of lyrics, do not add if already exist
+- Add login page to get user token
 
 --- Manual Search Modal
 - Adjust modal size (make it less wide)
@@ -30,7 +34,7 @@ Unified tokenization for all models
 - Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done)
 
 --- Touch Up
-- Add "section" to song verses table
+- Add "section" to song verses table (done)
 - Handle song info (label and verses) display when songs change, if same remain
 - Handle songs with long choruses
 

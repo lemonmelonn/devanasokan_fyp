@@ -9,7 +9,7 @@ import pandas as pd
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 import ollama
 
-from csv_functions import add_nonexplicit_song, add_explicit_song, add_verses, update_clean_verse, update_song_info, update_verse_label_score
+from csv_functions import add_verses, update_clean_verse, update_song_info, update_verse_label_score
 from spotify_functions import get_song_details
 
 # Load environment variables from .env
@@ -117,6 +117,19 @@ def split_verses(song_id, fullsong):
 
     # Format verses into a single line (separated by commas)
     df['verse'] = df['ori_verse'].apply(lambda x: ', '.join(x.splitlines()))
+
+    # Check if only one verse exists
+    # If yes, split them into multiple verses after 8 lines
+    if len(df) == 1:
+        single_verse = df.iloc[0]['verse']
+        lines = single_verse.splitlines()
+        if len(lines) > 8:
+            # Split into multiple verses of 8 lines each
+            split_verses = [lines[i:i + 8] for i in range(0, len(lines), 8)]
+            df = pd.DataFrame({"verse": ['\n'.join(v) for v in split_verses]})
+            print(f"Split single verse into {len(split_verses)} verses.")
+        else:
+            print("Single verse has 8 or fewer lines; no splitting needed.")
 
     return df
 
@@ -363,7 +376,7 @@ def get_llm_explanation(song_id, CSV_FILE):
 
     # Check if lyrics exist
     if pd.isna(llm_info) or llm_info.strip() == "":
-        if CSV_FILE == "explicit.csv":
+        if CSV_FILE == "songinfo.csv":
             lyrics = song_row.get("lyrics", "")
             prompt = create_prompt_explicit(lyrics)
             response = ollama.chat(

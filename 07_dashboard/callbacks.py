@@ -3,6 +3,7 @@ import logging
 import pickle
 import re
 from unittest import result
+import ollama
 import pandas as pd
 import io  # Add this import
 import os  # Add this import for environment variables
@@ -16,7 +17,7 @@ from urllib.parse import urlparse, parse_qs
 from layouts import song_card, song_classification_page, song_label_card, verse_label_table, graphs, song_history
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
-from csv_functions import check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label, add_nonexplicit_song, add_explicit_song
+from csv_functions import add_song_to_csv, check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,6 @@ SONG_ID = None
 SONG_TITLE = None
 SONG_ARTIST = None
 SONG_EXPLICIT = None
-CSV_FILE = None
 
 SONG_LABEL = None  # Global variable to store the song label
 
@@ -60,6 +60,7 @@ def register_callbacks(app):
 
         return html.Div("404: Page not found", className="dashboard-page")
     
+    # Callback to fetch the currently playing song and update the song card
     @app.callback(
         Output("currently-listening-content", "children"),
         Input("url", "pathname"),
@@ -70,20 +71,16 @@ def register_callbacks(app):
             raise PreventUpdate
 
         try:
+            # Fetch the currently playing track from Spotify
             current_track = get_currently_playing()
 
             # Update global variables with song details
-            global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT, CSV_FILE
+            global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT
             SONG_ID = current_track.get("song_id")
             SONG_TITLE = current_track.get("title")
             SONG_ARTIST = current_track.get("artist")
             SONG_EXPLICIT = current_track.get("explicit")
-            CSV_FILE = None
-
-            if SONG_EXPLICIT is True:
-                CSV_FILE = "explicit.csv"
-            else:
-                CSV_FILE = "nonexplicit.csv"
+            
 
             # Add method to track details
             current_track["method"] = "Currently Listening"
@@ -92,7 +89,7 @@ def register_callbacks(app):
             print(f"\n[DEBUG] Current song: {current_track['title']} by {current_track['artist']}")
 
             # Print global variables for debugging
-            logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, CSV_FILE={CSV_FILE}\n")
+            logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, SONG_EXPLICIT={SONG_EXPLICIT}\n")
 
         except Exception as exc:
             logger.exception("Failed to fetch currently playing track")
@@ -100,7 +97,7 @@ def register_callbacks(app):
 
         return song_card(current_track)
     
-
+    # Callback to predict the song label and update the song label card and verse label table
     @app.callback(
         Output("song-label-output", "children"),
         Output("verse-table-output", "children"),
@@ -121,45 +118,48 @@ def register_callbacks(app):
             verse_info = None
 
             # Use the loaded classifier to predict the song label
-            exists = check_song_exists(SONG_ID, CSV_FILE)
+            exists = check_song_exists(SONG_ID)
 
-            # Check if song exists in respective CSV file
-            # If no record, add song details
+            # If record does not exist, add song details
             if not exists:
-                if SONG_EXPLICIT is True:
-                    add_explicit_song(SONG_ID, SONG_TITLE, SONG_ARTIST, CSV_FILE)
-                    
-                else:
-                    add_nonexplicit_song(SONG_ID, SONG_TITLE, SONG_ARTIST, CSV_FILE)
-                    
+                # Add the song to the CSV file
+                add_song_to_csv(SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT)
+
                 # Clean the song title to remove any text in parentheses for better lyric fetching
                 cleansongtitle = re.sub(r'\s*\(.*?\)\s*', '', SONG_TITLE)  # Remove text in parentheses
                 
+                # Fetch structured lyrics
                 full_song = get_structured_lyrics(SONG_ARTIST, cleansongtitle)
                 
+                # Split the lyrics into verses and clean them
                 split_verses(SONG_ID, full_song)        
                 text = clean_verses(SONG_ID)
 
+                # Use the classifier to get the overall label for the song
                 ovr_label = get_model_output(CLASSIFIER, SONG_ID, "verselabels.csv")
+
                 logger.info(f"Overall label for the song: {ovr_label}")
 
-                update_song_label(SONG_ID, ovr_label, CSV_FILE)
+                update_song_label(SONG_ID, ovr_label)
                 
-                maininfo = retrieve_song_info(SONG_ID, CSV_FILE)
-                print(maininfo)
+                maininfo = retrieve_song_info(SONG_ID)
+                #print(maininfo)
                     
             # If record exists, retrieve and print details
             else:
-                print(f"Song ID {SONG_ID} already exists in {CSV_FILE}.")
-                maininfo = retrieve_song_info(SONG_ID, CSV_FILE)
-                if SONG_EXPLICIT is False:
-                    print(maininfo)
+                print(f"\nSong ID {SONG_ID} already exists.")
+                maininfo = retrieve_song_info(SONG_ID)
+                print(maininfo)
 
+            # Retrieve verse information for the song
             verse_info = retrieve_verse_info(SONG_ID, "verselabels.csv")
-            if verse_info is not None:
-                print(verse_info)
-            print(maininfo)
+            # if verse_info is not None:
+            #     print(verse_info)
+            # print(maininfo)
+            print(f"\n[DEBUG] Retrieved verse information for Song ID {SONG_ID}: {verse_info.shape()}")
 
+
+            # Get the overall label for the song from maininfo
             song_label = maininfo.get("ovr_label") if maininfo else None
 
         except Exception as exc:
@@ -180,7 +180,6 @@ def register_callbacks(app):
         return not is_open
     
 
-
     @callback(
         Output("manual-search-modal", "is_open", allow_duplicate=True),
         Input("search-song", "n_clicks"),
@@ -190,6 +189,7 @@ def register_callbacks(app):
     def close_modal(n, is_open):
         return False
     
+    # Callback to handle song search and display results
     @callback(
         Output("search-results-store", "data"),
         Output("search-results", "children"),
@@ -201,6 +201,7 @@ def register_callbacks(app):
         if not query or len(query.strip()) < 2:
             return [], []
 
+        # Search for possible songs using the provided query
         songs = search_possible_songs(query)
 
         cards = []
@@ -240,6 +241,7 @@ def register_callbacks(app):
         return songs, cards
     
 
+    # Callback to handle song selection and update the song card
     @callback(
         Output("selected-song", "data"),
         Output("manual-search-modal", "is_open", allow_duplicate=True),
@@ -273,17 +275,11 @@ def register_callbacks(app):
         selected = songs[index]
 
         # Update global variables with song details
-        global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT, CSV_FILE
+        global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT
         SONG_ID = selected.get("song_id")
         SONG_TITLE = selected.get("title")
         SONG_ARTIST = selected.get("artist")
         SONG_EXPLICIT = selected.get("explicit")
-        CSV_FILE = None
-
-        if SONG_EXPLICIT is True:
-            CSV_FILE = "explicit.csv"
-        else:
-            CSV_FILE = "nonexplicit.csv"
 
         # Add method to track details
         selected["method"] = "Manual Search"
@@ -295,7 +291,7 @@ def register_callbacks(app):
         print(f"\n[DEBUG] Selected song: {selected['title']} by {selected['artist']}")
 
         # Print global variables for debugging
-        logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, CSV_FILE={CSV_FILE}\n")
+        logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, SONG_EXPLICIT={SONG_EXPLICIT}\n")
 
         # Return output
         return {
@@ -307,3 +303,28 @@ def register_callbacks(app):
             "explicit": selected["explicit"],
             "method": selected["method"]
         }, False, song_card(selected), ""
+    
+
+    # Trial, probably will not include in final dahsboard
+    @app.callback(
+        Output("llm-explanation-store", "data"),
+        Input("test-llm-button", "n_clicks")
+    )
+    def get_llm_explanation(n_clicks):
+        if n_clicks is None:
+            return no_update
+
+        response = ollama.chat(
+            model="llama3",   # change if needed
+            messages=[
+                {"role": "user", "content": f"What is this code"}
+            ]
+        )
+
+        llm_info = response["message"]["content"].strip()
+        print(f"LLM Explanation: {llm_info}")
+        return llm_info
+
+
+    # Callback to load last song checked on song card
+    # take from existing calback

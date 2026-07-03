@@ -154,7 +154,7 @@ def verse_label_table(verse_info=None, error=None):
             className="dashboard-card shadow-sm border-0"
         )
 
-    display_columns = ["ori_verse", "label", "score"]
+    display_columns = ["section", "ori_verse", "label", "score"]
     table_data = verse_info.copy()
 
     for column in display_columns:
@@ -165,15 +165,17 @@ def verse_label_table(verse_info=None, error=None):
 
     header = html.Thead(
         html.Tr([
-            html.Th("Verse"),
-            html.Th("Label"),
-            html.Th("Confidence"),
+            html.Th("Section", style={"width": "15%"}),
+            html.Th("Verse", style={"width": "55%"}),
+            html.Th("Label", style={"width": "15%"}),
+            html.Th("Confidence", style={"width": "15%"}),
         ])
     )
 
     body = html.Tbody([
         html.Tr(
             [
+                html.Td(str(row["section"])),
                 html.Td(str(row["ori_verse"])),
                 html.Td(str(row["label"])),
                 html.Td(str(row["score"])),
@@ -201,11 +203,29 @@ def song_classification_page():
     return html.Div([
         html.H1("Song Classification", className="page-title mb-4"),
         html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
-        html.Div(
-            id="currently-listening-content",
-            children=song_card(),
-            className="content-stack mt-4"
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        id="currently-listening-content",
+                        children=song_card(),
+                        className="content-stack mt-4"
+                    ),
+                    md=8,
+                ),
+                dbc.Col(
+                    html.Div(
+                        id="song-label-output",
+                        children=song_label_card(),
+                        className="content-stack mt-4"
+                    ),
+                    md=4,
+                ),
+            ],
+            className="mt-4 g-3",
         ),
+
         html.Div(
             [
                 dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button"),
@@ -214,28 +234,17 @@ def song_classification_page():
             ],
             className="button-row mt-2"
         ),
-        dbc.Row(
-            [
-                dbc.Col(
-                    html.Div(
-                        id="song-label-output",
-                        children=song_label_card(),
-                    ),
-                    md=4,
-                ),
-                dbc.Col(
-                    html.Div(
-                        id="verse-table-output",
-                        children=verse_label_table(),
-                    ),
-                    md=8,
-                ),
-            ],
-            className="mt-4 g-3",
+
+        html.Br(),
+
+        html.Div(
+            id="verse-table-output",
+            children=verse_label_table(),
         ),
         
         dcc.Store(id="search-results-store"),
         dcc.Store(id="selected-song"),
+        dcc.Store(id="llm-explanation-store"),
 
         dbc.Modal(
             [
