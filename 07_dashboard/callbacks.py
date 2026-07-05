@@ -156,7 +156,7 @@ def register_callbacks(app):
             # if verse_info is not None:
             #     print(verse_info)
             # print(maininfo)
-            print(f"\n[DEBUG] Retrieved verse information for Song ID {SONG_ID}: {verse_info.shape()}")
+            # print(f"\n[DEBUG] Retrieved verse information for Song ID {SONG_ID}: {verse_info.shape()}")
 
 
             # Get the overall label for the song from maininfo

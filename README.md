@@ -21,10 +21,10 @@ Unified tokenization for all models
 
 --- General
 - Add callback to clear song label and song verses if global variables change
-- Make only one csv for both explicit and non-explicit songs
+- Make only one csv for both explicit and non-explicit songs (done)
 - See why cannot use LLM/ find out if still can use
 - Make sure each song only has one set of lyrics, do not add if already exist
-- Add login page to get user token
+- Add login page to get user token (Major addition, need copilot)
 
 --- Manual Search Modal
 - Adjust modal size (make it less wide)

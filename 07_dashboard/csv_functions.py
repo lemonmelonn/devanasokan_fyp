@@ -66,10 +66,21 @@ def check_song_exists(song_id):
 
 def add_verses(song_id, verse_id, section, verse, CSV_FILE):
 
+    # Create CSV if it doesn't exist
     if not os.path.exists(CSV_FILE):
-        print(f"CSV file {CSV_FILE} does not exist.")
-        return False
-
+        df = pd.DataFrame(
+            columns=[
+                "song_id",
+                "verse_id",
+                "section",
+                "ori_verse",
+                "clean_verse",
+                "label",
+                "score"
+            ]
+        )
+        df.to_csv(CSV_FILE, index=False)
+        
     df = pd.read_csv(CSV_FILE, dtype={"song_id": "str"}, keep_default_na=False)
 
     song_id = str(song_id)

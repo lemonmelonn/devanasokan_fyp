@@ -9,7 +9,6 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-ALBUM_NAME = "1989"
 
 # Initialize Spotify client with user-read-currently-playing scope
 sp = Spotify(auth_manager=SpotifyOAuth(
