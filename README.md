@@ -24,11 +24,13 @@ Unified tokenization for all models
 - Make only one csv for both explicit and non-explicit songs (done)
 - See why cannot use LLM/ find out if still can use
 - Make sure each song only has one set of lyrics, do not add if already exist
-- Add login page to get user token (Major addition, need copilot)
+- Add monke pic?
+- Add logout feature? (remove cache)
+- Proper name for dashboard
 
 --- Manual Search Modal
 - Adjust modal size (make it less wide)
-- Button for manual search (opens modal)
+- Button for manual search (opens modal) --- (done)
 - Clear serach bar after song selected --- (done)
 - Update global variables after click song --- (done)
 - Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done)
@@ -46,8 +48,10 @@ Unified tokenization for all models
 - Add comments
 - Remove any unused functions/code/styling
 
-Structure of final report
-Pipeline needs to be csv based, update line by line
-Me
 
+Structure of final report
+
+Pipeline needs to be csv based, update line by line
+
+Me
 

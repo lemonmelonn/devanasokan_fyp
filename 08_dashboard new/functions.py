@@ -26,7 +26,7 @@ genius = lyricsgenius.Genius(
 # Load the model and tokenizer from local folder
 def load_model():
     # Load the model and tokenizer from your local folder
-    path = "./07_dashboard/my_final_model"
+    path = "./05_model_training/my_final_model"
     model = AutoModelForSequenceClassification.from_pretrained(path)
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased") # Ensure tokenizer has been saved
 

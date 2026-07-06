@@ -224,5 +224,7 @@ my_bert_models/
 05_model_training/rnn_lyrics_classifier.pt
 05_model_training/results/
 
+07_dashboard/my_final_model/
+
 # CSV Files
 *.csv

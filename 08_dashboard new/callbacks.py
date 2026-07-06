@@ -12,11 +12,23 @@ from dash import Input, Output, State, callback, callback_context, ALL, ctx, htm
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
+from flask import redirect, request, session
 from urllib.parse import urlparse, parse_qs
 
-from layouts import song_card, song_classification_page, song_label_card, verse_label_table, graphs, song_history
+from layouts import song_card, song_classification_page, song_label_card, verse_label_table, graphs, song_history, spotify_auth_controls
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
-from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
+from spotify_functions import (
+    SpotifyAuthError,
+    build_spotify_auth_url,
+    clear_spotify_session,
+    exchange_code_for_token,
+    get_access_token,
+    get_currently_playing,
+    get_spotify_access_token_from_session,
+    is_spotify_authenticated,
+    search_possible_songs,
+    store_spotify_session,
+)
 from csv_functions import add_song_to_csv, check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label
 
 logger = logging.getLogger(__name__)
@@ -36,6 +48,41 @@ SONG_EXPLICIT = None
 SONG_LABEL = None  # Global variable to store the song label
 
 def register_callbacks(app):
+
+    @app.server.route("/login")
+    def spotify_login():
+        if is_spotify_authenticated():
+            return redirect("/currently-listening")
+
+        try:
+            auth_url = build_spotify_auth_url()
+        except SpotifyAuthError as exc:
+            return f"<h2>Spotify login unavailable</h2><p>{exc}</p><a href='/currently-listening'>Back</a>"
+
+        return redirect(auth_url)
+
+
+    @app.server.route("/callback")
+    def spotify_callback():
+        error = request.args.get("error")
+        if error:
+            return f"<h2>Spotify login failed</h2><p>{error}</p><a href='/currently-listening'>Back</a>"
+
+        code = request.args.get("code")
+
+        try:
+            token_json = exchange_code_for_token(code)
+        except SpotifyAuthError as exc:
+            return f"<h2>Spotify login failed</h2><p>{exc}</p><a href='/currently-listening'>Back</a>"
+
+        store_spotify_session(token_json)
+        return redirect("/currently-listening")
+
+
+    @app.server.route("/logout")
+    def spotify_logout():
+        clear_spotify_session()
+        return redirect("/currently-listening")
     
     @app.callback(
         Output("page-container", "children"),
@@ -59,6 +106,14 @@ def register_callbacks(app):
             return graphs()
 
         return html.Div("404: Page not found", className="dashboard-page")
+
+    @app.callback(
+        Output("spotify-auth-controls", "children"),
+        Input("url", "pathname"),
+        Input("url", "href"),
+    )
+    def render_spotify_auth_controls(pathname, href):
+        return spotify_auth_controls(logged_in=is_spotify_authenticated())
     
     # Callback to fetch the currently playing song and update the song card
     @app.callback(
@@ -71,8 +126,16 @@ def register_callbacks(app):
             raise PreventUpdate
 
         try:
+            access_token = get_spotify_access_token_from_session()
+
+            if not access_token:
+                return song_card(prompt="Sign in with Spotify to load your currently playing track.")
+
             # Fetch the currently playing track from Spotify
-            current_track = get_currently_playing()
+            current_track = get_currently_playing(access_token)
+
+            if not current_track:
+                return song_card(prompt="No song is currently playing on Spotify.")
 
             # Update global variables with song details
             global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT
@@ -90,6 +153,11 @@ def register_callbacks(app):
 
             # Print global variables for debugging
             logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, SONG_EXPLICIT={SONG_EXPLICIT}\n")
+
+        except SpotifyAuthError as exc:
+            logger.info("Spotify session is not available: %s", exc)
+            clear_spotify_session()
+            return song_card(prompt="Sign in with Spotify to load your currently playing track.")
 
         except Exception as exc:
             logger.exception("Failed to fetch currently playing track")
@@ -112,7 +180,7 @@ def register_callbacks(app):
             raise PreventUpdate
 
         if SONG_ID is None:
-            return song_label_card(error="No song selected"), verse_label_table()
+            return html.P("No song available for prediction."), verse_label_table()
 
         try:
             verse_info = None

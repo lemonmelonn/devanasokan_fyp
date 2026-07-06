@@ -21,55 +21,27 @@ def dashboard_menu():
     )
 
 # Song Card Layout (Handles both currently listening and manual search results)
-def song_card(track=None, error=None):
+def song_card(track=None, error=None, prompt=None):
 
     method = track.get("method") if track else "Currently Listening"
-    # print("Album cover:", track.get("album_image") if track else "No track data")
-
-    # Use placeholder image if no track is available
-    cover_src = "/assets/monke.jpg"
-    false_cover = html.Img(
-        src=cover_src,
-        alt="Album cover",
-        className="dashboard-cover"
-    )
+    print("Album cover:", track.get("album_image") if track else "No track data")
 
     if error:
         return dbc.Card(
-            dbc.CardBody(
-                html.Div(
-                    [
-                        false_cover,
-                        html.Div(
-                            [
-                                html.H4("Something went wrong", className="section-header mb-2"),
-                                html.P("Unable to load the track right now.", className="section-body mb-1")
-                            ],
-                            className="flex-grow-1"
-                        ),
-                    ],
-                    className="d-flex align-items-center gap-3 flex-wrap"
-                )
-            ),
+            dbc.CardBody([
+                html.H4(method, className="section-header mb-2"),
+                html.P("Unable to load the current track right now.", className="section-body mb-1")
+                # html.Small(str(error), className="text-muted")
+            ]),
             className="dashboard-card shadow-sm border-0"
         )
 
     if not track:
+        message = prompt or "No song is currently playing."
         return dbc.Card(
             dbc.CardBody([
-                html.Div(
-                    [
-                        false_cover,
-                        html.Div(
-                            [
-                                html.H4("No Track Available", className="section-header mb-2"),
-                                html.P("No song is currently playing.", className="section-body mb-1")
-                            ],
-                            className="flex-grow-1"
-                        ),
-                    ],
-                    className="d-flex align-items-center gap-3 flex-wrap"
-                )
+                html.H4(method, className="section-header mb-2"),
+                html.P(message, className="section-body mb-0")
             ]),
             className="dashboard-card shadow-sm border-0"
         )
@@ -87,6 +59,7 @@ def song_card(track=None, error=None):
 
     # Display album cover
     album_image = track.get("album_image")
+
     cover = html.Img(
         src=album_image,
         alt=f"{track.get('album', 'Album cover')} cover",
@@ -127,6 +100,24 @@ def song_card(track=None, error=None):
         className="dashboard-card shadow-sm border-0"
     )
 
+
+def spotify_auth_controls(logged_in=False):
+    if logged_in:
+        return html.Div(
+            [
+                html.Span("Spotify connected", className="section-meta me-3"),
+                dbc.Button("Logout", href="/logout", color="secondary", className="dashboard-button"),
+            ],
+            className="d-flex align-items-center flex-wrap gap-2",
+        )
+
+    return html.Div(
+        [
+            dbc.Button("Sign in with Spotify", href="/login", color="success", className="dashboard-button"),
+        ],
+        className="d-flex align-items-center flex-wrap gap-2",
+    )
+
 # Card for displaying the song label
 def song_label_card(label=None, error=None):
     if error:
@@ -148,27 +139,13 @@ def song_label_card(label=None, error=None):
             className="dashboard-card shadow-sm border-0"
         )
 
-    # Create the explicit badge based on the track's explicit status
-    label_badge = dbc.Badge(
-        "UNSAFE",
-        color="danger",
-        className="ms-2",
-        style={"fontSize": "18px", "font-weight": "bold", "text-transform": "uppercase"}
-    ) if label == "UNSAFE" else dbc.Badge(
-        "SAFE",
-        color="success",
-        className="ms-2",
-        style={"fontSize": "18px", "font-weight": "bold", "text-transform": "uppercase"}
-    )
-    
     # Return the card with the song label
     return dbc.Card(
         dbc.CardBody([
             html.Div(
                 [
                     html.H4("Song Label", className="section-header mb-1"),
-                    html.Br(),
-                    label_badge
+                    html.P(label, className="label-value mb-0"),
                 ]
             )
         ]),
@@ -244,7 +221,12 @@ def verse_label_table(verse_info=None, error=None):
 def song_classification_page():
     return html.Div([
         html.H1("Song Classification", className="page-title mb-4"),
-        # html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
+        html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
+
+        html.Div(
+            id="spotify-auth-controls",
+            className="mt-3",
+        ),
 
         dbc.Row(
             [
