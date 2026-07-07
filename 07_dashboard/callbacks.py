@@ -305,26 +305,25 @@ def register_callbacks(app):
         }, False, song_card(selected), ""
     
 
-    # Trial, probably will not include in final dahsboard
+    # Callback to clear info when new song is selected from modal
     @app.callback(
-        Output("llm-explanation-store", "data"),
-        Input("test-llm-button", "n_clicks")
+        Output("song-label-output", "children", allow_duplicate=True),
+        Output("verse-table-output", "children", allow_duplicate=True),
+        Input({"type": "song-card", "index": ALL}, "n_clicks"),
+        prevent_initial_call=True
     )
-    def get_llm_explanation(n_clicks):
-        if n_clicks is None:
-            return no_update
+    def clear_labels(n_clicks_list):
+        
+        return song_label_card(label=None), verse_label_table(verse_info=None)
 
-        response = ollama.chat(
-            model="llama3",   # change if needed
-            messages=[
-                {"role": "user", "content": f"What is this code"}
-            ]
-        )
-
-        llm_info = response["message"]["content"].strip()
-        print(f"LLM Explanation: {llm_info}")
-        return llm_info
-
-
-    # Callback to load last song checked on song card
-    # take from existing calback
+    
+    # Callback to clear info when "Current Song" button is clicked
+    @app.callback(
+        Output("song-label-output", "children", allow_duplicate=True),
+        Output("verse-table-output", "children", allow_duplicate=True),
+        Input("get-current-song", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def clear_labels(n_clicks):
+        
+        return song_label_card(label=None), verse_label_table(verse_info=None)
