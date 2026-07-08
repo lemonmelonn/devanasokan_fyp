@@ -6,17 +6,18 @@ from datetime import date, timedelta
 # import dash_ag_grid as dag
 
 
+# Layout for the dashboard
 def dashboard_menu():
     return dbc.NavbarSimple(
-        brand="Song Safeness Dashboard",
+        brand="LyricLens",
         color="primary",
         dark=True,
         fluid=True,
         className="dashboard-navbar",
         children=[
             dbc.NavItem(dbc.NavLink("Song Classification", href="/currently-listening")),
-            dbc.NavItem(dbc.NavLink("Graphs", href="/graphs")),
-            dbc.NavItem(dbc.NavLink("Song History", href="/song-history")),
+            dbc.NavItem(dbc.NavLink("Model", href="/graphs")),
+            dbc.NavItem(dbc.NavLink("Song History", href="/song-history")), # Maybe not
         ],
     )
 
@@ -168,7 +169,12 @@ def song_label_card(label=None, error=None):
                 [
                     html.H4("Song Label", className="section-header mb-1"),
                     html.Br(),
-                    label_badge
+                    label_badge,
+                    html.Br(),
+                    html.Br(),
+                    html.P("SAFE - Suitable for children\n", className="section-meta"),
+                    html.Br(),
+                    html.P("UNSAFE - Not suitable for children", className="section-meta"),
                 ]
             )
         ]),
