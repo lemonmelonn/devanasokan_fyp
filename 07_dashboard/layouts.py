@@ -334,7 +334,7 @@ def song_classification_page():
 # Graphs Layout
 def graphs():
     return html.Div([
-        html.H1("Graphs", className="page-title mb-4"),
+        html.H1("Model", className="page-title mb-4"),
         html.P("This page will display various graphs and visualizations.", className="page-subtitle")
     ], className="dashboard-page")
 

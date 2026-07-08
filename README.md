@@ -28,6 +28,8 @@ Unified tokenization for all models
 - Add logout feature? (remove cache)
 - Proper name for dashboard
 - Round up confidence score --- (done)
+- Add info hover at the bottom corner
+- Rename graphs to models
 
 --- Manual Search Modal
 - Adjust modal size (make it less wide)
