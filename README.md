@@ -25,6 +25,7 @@ Unified tokenization for all models
 - Put components in model page (overview, confusion matrix, error plot?)
 - Add logout feature? (remove cache)
 - Add info at song label card
+- Adjust song card text size
 - Proper name for dashboard
 - Add callback to clear song label and song verses --- (done)
 - Make only one csv for both explicit and non-explicit songs --- (done)
@@ -40,6 +41,15 @@ Unified tokenization for all models
 - Clear search bar after song selected --- (done)
 - Update global variables after click song --- (done)
 - Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done)
+
+
+--- Model Page
+- Model overview
+- Dataset used, statistics (songs, verses, label, distribution)
+- Preprocessing steps
+- Best Hyperparameters
+- Confusion Matrix, Loss, Accuracy?
+- Comparison with other model
 
 
 --- After Finish All Features

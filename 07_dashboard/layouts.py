@@ -135,7 +135,17 @@ def song_label_card(label=None, error=None):
             dbc.CardBody([
                 html.H4("Song Label", className="section-header mb-2"),
                 html.P("Unable to determine the song label right now.", className="section-body mb-1"),
-                html.Small(str(error), className="section-meta")
+                html.Small(str(error), className="section-meta"),
+                html.Br(),
+                html.P(
+                    "SAFE: Suitable for children\nUNSAFE: Not suitable for children",
+                    style={
+                        "marginTop": "15px",
+                        "fontSize": "12px",
+                        "color": "#4F5860",
+                        "whiteSpace": "pre-line",
+                    },
+                ),
             ]),
             className="dashboard-card shadow-sm border-0"
         )
@@ -144,7 +154,17 @@ def song_label_card(label=None, error=None):
         return dbc.Card(
             dbc.CardBody([
                 html.H4("Song Label", className="section-header mb-2"),
-                html.P("No label has been determined for the current song.", className="section-body mb-0")
+                html.P("No label has been determined for the current song.", className="section-body mb-0"),
+                html.Br(),
+                html.P(
+                    "SAFE: Suitable for children\nUNSAFE: Not suitable for children",
+                        style={
+                            "marginTop": "15px",
+                            "fontSize": "12px",
+                            "color": "#4F5860",
+                            "whiteSpace": "pre-line",
+                        },
+                ),
             ]),
             className="dashboard-card shadow-sm border-0"
         )
@@ -172,9 +192,15 @@ def song_label_card(label=None, error=None):
                     label_badge,
                     html.Br(),
                     html.Br(),
-                    html.P("SAFE - Suitable for children\n", className="section-meta"),
-                    html.Br(),
-                    html.P("UNSAFE - Not suitable for children", className="section-meta"),
+                    html.P(
+                        "SAFE: Suitable for children\nUNSAFE: Not suitable for children",
+                        style={
+                            "marginTop": "15px",
+                            "fontSize": "12px",
+                            "color": "#4F5860", # adjust colour later
+                            "whiteSpace": "pre-line",
+                        },
+                    ),
                 ]
             )
         ]),
