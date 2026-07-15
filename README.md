@@ -17,6 +17,9 @@ Unified tokenization for all models
 - Understand exact processes in model training/hyperparameter tuning notebooks
 - Understand what is hidden size and attention heads in Bert and Distilbert
 
+MAJOR ISSUE
+- New dashboard tak jalan, redirect uri cacat sikit
+
 
 --- General
 - See why cannot use LLM/ find out if still can use
