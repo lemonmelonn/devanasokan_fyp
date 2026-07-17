@@ -82,3 +82,4 @@ verse_df.insert(0, 'verse_id', range(1, len(verse_df) + 1))
 print(verse_df.shape)
 print(verse_df.columns)
 verse_df.to_csv('./storage/verses.csv', index=False, encoding='utf-8-sig')
+
