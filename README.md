@@ -17,19 +17,13 @@ Unified tokenization for all models
 - Understand exact processes in model training/hyperparameter tuning notebooks
 - Understand what is hidden size and attention heads in Bert and Distilbert
 
-MAJOR ISSUE
-- New dashboard tak jalan, redirect uri cacat sikit
-
 
 --- General
 - See why cannot use LLM/ find out if still can use
 - Make sure each song only has one set of lyrics, do not add if already exist
 - Handle songs with long choruses
-- Put components in model page (overview, confusion matrix, error plot?)
 - Add logout feature? (remove cache)
-- Add info at song label card
-- Adjust song card text size
-- Proper name for dashboard
+- Add info at song label card --- (done)
 - Add callback to clear song label and song verses --- (done)
 - Make only one csv for both explicit and non-explicit songs --- (done)
 - Add monke pic? --- (done)
@@ -38,8 +32,6 @@ MAJOR ISSUE
 
 
 --- Manual Search Modal
-- Adjust modal size (make it less wide)
-- Adjust song card width in modal (make it smaller than modal to remove the bottom scroller)
 - Button for manual search (opens modal) --- (done)
 - Clear search bar after song selected --- (done)
 - Update global variables after click song --- (done)
@@ -57,6 +49,10 @@ MAJOR ISSUE
 
 --- After Finish All Features
 - Redesign UI
+- Adjust song card text size
+- Proper name for dashboard
+- Adjust modal size (make it less wide)
+- Adjust song card width in modal (make it smaller than modal to remove the bottom scroller)
 - Adjust width of column header (later, once all features are finalized)
 - Adjust size of album cover
 - Adjust position of "Get Report" button
