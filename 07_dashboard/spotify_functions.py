@@ -9,7 +9,6 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-ALBUM_NAME = "1989"
 
 # Initialize Spotify client with user-read-currently-playing scope
 sp = Spotify(auth_manager=SpotifyOAuth(
@@ -173,17 +172,30 @@ def get_album_tracks(album_id, token):
     return response.json()["items"]
 
 
-# token = get_access_token()
-# album = find_album(ALBUM_NAME)
+def search_possible_songs(query, limit=5):
+    """
+    Search songs using Spotify API
+    Returns list formatted for Dash dropdown
+    """
 
-# if album:
-#     print("Album:", album["name"], album["id"])
-#     print("Artist:", album["artists"][0]["name"])
+    if not query:
+        return []
 
-#     tracks = get_album_tracks(album["id"], token)
+    results = sp.search(q=query, type="track", limit=limit)
 
-#     print("\nTracks:")
-#     for track in tracks:
-#         print(track["track_number"], "-", track["name"])
-# else:
-#     print("Album not found")
+    items = results["tracks"]["items"]
+
+    formatted = []
+
+    for item in items:
+
+        formatted.append({
+            "song_id": item["id"],
+            "title": item["name"],
+            "artist": item["artists"][0]["name"],
+            "album": item["album"]["name"],
+            "album_cover": item["album"]["images"][0]["url"] if item["album"]["images"] else None,
+            "explicit": item["explicit"]
+        })
+
+    return formatted

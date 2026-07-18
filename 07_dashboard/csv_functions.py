@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 
+CSV_FILE = "songinfo.csv"
 
 def _clean_text_value(value):
     if pd.isna(value):
@@ -12,13 +13,7 @@ def _clean_text_value(value):
 
     return text
 
-def add_nonexplicit_song(song_id, title, artist, CSV_FILE):
-    """
-    Add a song to the CSV file.
-
-    Columns:
-    song_id, title, artist, ovr_label, llm_info
-    """
+def add_song_to_csv(song_id, title, artist, explicit):
 
     # Create CSV if it doesn't exist
     if not os.path.exists(CSV_FILE):
@@ -27,8 +22,8 @@ def add_nonexplicit_song(song_id, title, artist, CSV_FILE):
                 "song_id",
                 "title",
                 "artist",
-                "ovr_label",
-                "llm_info"
+                "explicit",
+                "ovr_label"
             ]
         )
         df.to_csv(CSV_FILE, index=False)
@@ -41,8 +36,8 @@ def add_nonexplicit_song(song_id, title, artist, CSV_FILE):
         "song_id": song_id,
         "title": title,
         "artist": artist,
-        "ovr_label": "",
-        "llm_info": ""
+        "explicit": explicit,
+        "ovr_label": ""
     }
 
     # Append row
@@ -56,59 +51,8 @@ def add_nonexplicit_song(song_id, title, artist, CSV_FILE):
     return song_id
 
 
-def add_explicit_song(song_id, title, artist, CSV_FILE):
-    """
-    Add a song to the CSV file.
-
-    Columns:
-    song_id, title, artist, lyrics, ovr_label, llm_info
-    """
-
-    # Create CSV if it doesn't exist
-    if not os.path.exists(CSV_FILE):
-        df = pd.DataFrame(
-            columns=[
-                "song_id",
-                "title",
-                "artist",
-                "lyrics",
-                "ovr_label",
-                "llm_info"
-            ]
-        )
-        df.to_csv(CSV_FILE, index=False)
-
-    # Load existing data
-    df = pd.read_csv(CSV_FILE)
-
-    # Create new row
-    new_row = {
-        "song_id": song_id,
-        "title": title,
-        "artist": artist,
-        "lyrics": "",
-        "ovr_label": "UNSAFE",
-        "llm_info": ""
-    }
-
-    # Append row
-    df.loc[len(df)] = new_row
-
-    # Save
-    df.to_csv(CSV_FILE, index=False)
-
-    print(f"Added: [{song_id}] {title} - {artist}")
-
-    return song_id
-
-def check_song_exists(song_id, CSV_FILE):
-    """
-    Check if a song with the given ID exists in the CSV file.
-
-    Returns:
-        True if the song exists, False otherwise.
-    """
-
+def check_song_exists(song_id):
+    
     if not os.path.exists(CSV_FILE):
         return False
     
@@ -121,20 +65,22 @@ def check_song_exists(song_id, CSV_FILE):
 
 
 def add_verses(song_id, verse_id, section, verse, CSV_FILE):
-    """
-    Add verse to a song in the CSV file.
 
-    Args:
-        song_id: The ID of the song to update.
-        verse_id: The ID of the verse to add.
-        section: The section name for the verse.
-        verse: The verse text to add.
-    """
-
+    # Create CSV if it doesn't exist
     if not os.path.exists(CSV_FILE):
-        print(f"CSV file {CSV_FILE} does not exist.")
-        return False
-
+        df = pd.DataFrame(
+            columns=[
+                "song_id",
+                "verse_id",
+                "section",
+                "ori_verse",
+                "clean_verse",
+                "label",
+                "score"
+            ]
+        )
+        df.to_csv(CSV_FILE, index=False)
+        
     df = pd.read_csv(CSV_FILE, dtype={"song_id": "str"}, keep_default_na=False)
 
     song_id = str(song_id)
@@ -198,7 +144,7 @@ def update_clean_verse(song_id, verse_id, clean_verse, CSV_FILE):
 
 
 # Update the ovr_label for a specific song.
-def update_song_label(song_id, ovr_label, CSV_FILE):
+def update_song_label(song_id, ovr_label):
 
     # Load CSV
     df = pd.read_csv(CSV_FILE, dtype={"song_id": "str"}, keep_default_na=False)
@@ -276,14 +222,8 @@ def update_song_info(song_id, llm_info, CSV_FILE):
     return True
 
 
-def retrieve_song_info(song_id, CSV_FILE):
-    """
-    Retrieve a song's details from the CSV file based on its ID.
-
-    Returns:
-        dict containing song details, or None if not found.
-    """
-
+def retrieve_song_info(song_id):
+    
     if not os.path.exists(CSV_FILE):
         print(f"CSV file {CSV_FILE} does not exist.")
         return None
@@ -300,32 +240,17 @@ def retrieve_song_info(song_id, CSV_FILE):
     # Retrieve the row
     row = df[df["song_id"] == song_id].iloc[0]
 
-    if CSV_FILE == "explicit.csv":
-        return {
-            "song_id": row["song_id"],
-            "title": row["title"],
-            "artist": row["artist"],
-            "lyrics": row.get("lyrics", ""),
-            "ovr_label": row.get("ovr_label", ""),
-            "llm_info": row.get("llm_info", "")
-        }
-    else:
-        return {
-            "song_id": row["song_id"],
-            "title": row["title"],
-            "artist": row["artist"],
-            "ovr_label": row.get("ovr_label", ""),
-            "llm_info": row.get("llm_info", "")
-        }
+    # Return relevant information
+    return {
+        "song_id": row["song_id"],
+        "title": row["title"],
+        "artist": row["artist"],
+        "explicit": row["explicit"],
+        "ovr_label": row.get("ovr_label", "")
+    }
     
 
 def retrieve_verse_info(song_id, CSV_FILE):
-    """
-    Retrieve a song's verses from the CSV file based on its ID.
-
-    Returns:
-        list of dicts containing verse details, or None if not found.
-    """
 
     if not os.path.exists(CSV_FILE):
         print(f"CSV file {CSV_FILE} does not exist.")
@@ -342,6 +267,9 @@ def retrieve_verse_info(song_id, CSV_FILE):
 
     # Retrieve all rows for the song
     verses_df = df[df["song_id"] == song_id]
+
+    # Round the confidence score to 5 decimal places
+    verses_df["score"] = verses_df["score"].apply(lambda x: round(float(x), 5) if pd.notna(x) else x)
 
     return verses_df
 

@@ -2,30 +2,61 @@
 Code repository for Final Year Project (Devan Asokan - Asia Pacific University)
 
 
-### Issues
+### Possible Issues
 
-Dataset size
 Labelling prompt
 Length of verses, maximum length
-Proper LSTM approach
+Proper LSTM approach, tuning
 Unified tokenization for all models
 
-### To Do
+### To Do (Components)
 
-- Tuning for other 3 models
+--- Model Training
+- Tuning for other 3 models (need to test)
 - Find optimal hyperparameter range
+- Understand exact processes in model training/hyperparameter tuning notebooks
 - Understand what is hidden size and attention heads in Bert and Distilbert
 
-Design dashboard
-- Display logo (done)
-- Handle song info (label and verses) display when songs change (if same remain)
-- Display dataframe of verses (done)
+
+--- General
+- See why cannot use LLM/ find out if still can use
+- Make sure each song only has one set of lyrics, do not add if already exist
 - Handle songs with long choruses
+- Add logout feature? (remove cache)
+- Add info at song label card --- (done)
+- Add callback to clear song label and song verses --- (done)
+- Make only one csv for both explicit and non-explicit songs --- (done)
+- Add monke pic? --- (done)
+- Round up confidence score --- (done)
+- Handle song info (label and verses) display when songs change, if same remain --- (done)
 
-- Redesign UI details (ongoing)
 
-Structure of final report
-Pipeline needs to be csv based, update line by line
-Me
+--- Manual Search Modal
+- Button for manual search (opens modal) --- (done)
+- Clear search bar after song selected --- (done)
+- Update global variables after click song --- (done)
+- Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done)
 
+
+--- Model Page
+- Model overview
+- Dataset used, statistics (songs, verses, label, distribution)
+- Preprocessing steps
+- Best Hyperparameters
+- Confusion Matrix, Loss, Accuracy?
+- Comparison with other model
+
+
+--- After Finish All Features
+- Redesign UI
+- Adjust song card text size
+- Proper name for dashboard
+- Adjust modal size (make it less wide)
+- Adjust song card width in modal (make it smaller than modal to remove the bottom scroller)
+- Adjust width of column header (later, once all features are finalized)
+- Adjust size of album cover
+- Adjust position of "Get Report" button
+- Display dataframe of verses --- (done)
+- Add code comments
+- Remove any unused functions/code/styling
 

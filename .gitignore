@@ -215,6 +215,7 @@ storage/
 huggingface_cache/
 my_bert_models/
 
+# Model Training Artifacts
 05_model_training/my_final_model/
 05_model_training/my_final_bert/
 05_model_training/lstm_artifacts/
@@ -222,6 +223,8 @@ my_bert_models/
 05_model_training/rnn_artifacts
 05_model_training/rnn_lyrics_classifier.pt
 05_model_training/results/
+
+07_dashboard/my_final_model/
 
 # CSV Files
 *.csv
