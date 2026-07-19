@@ -1,5 +1,5 @@
 # devanasokan_fyp
-Code repository for Final Year Project (Devan Asokan - Asia Pacific University)
+Code repository for Final Year Project (Devan Asokan - Asia Pacific University) <br><br>
 
 
 ### Possible Issues
@@ -7,15 +7,19 @@ Code repository for Final Year Project (Devan Asokan - Asia Pacific University)
 Labelling prompt
 Length of verses, maximum length
 Proper LSTM approach, tuning
-Unified tokenization for all models
+Unified tokenization for all models <br><br>
+
+
 
 ### To Do (Components)
+<br>
 
 --- Model Training
 - Tuning for other 3 models (need to test)
 - Find optimal hyperparameter range
+- Adjust number of epochs (3 or 4, instead of 2)
 - Understand exact processes in model training/hyperparameter tuning notebooks
-- Understand what is hidden size and attention heads in Bert and Distilbert
+- Understand what is hidden size and attention heads in Bert and Distilbert <br><br>
 
 
 --- General
@@ -28,14 +32,16 @@ Unified tokenization for all models
 - Make only one csv for both explicit and non-explicit songs --- (done)
 - Add monke pic? --- (done)
 - Round up confidence score --- (done)
-- Handle song info (label and verses) display when songs change, if same remain --- (done)
+- Handle song info (label and verses) display when songs change, if same remain --- (done) <br><br>
+
 
 
 --- Manual Search Modal
 - Button for manual search (opens modal) --- (done)
 - Clear search bar after song selected --- (done)
 - Update global variables after click song --- (done)
-- Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done)
+- Rename "currently_listening" layout to something general, can handle manual search and currently listening --- (done) <br><br>
+
 
 
 --- Model Page
@@ -44,7 +50,8 @@ Unified tokenization for all models
 - Preprocessing steps
 - Best Hyperparameters
 - Confusion Matrix, Loss, Accuracy?
-- Comparison with other model
+- Comparison with other model <br><br>
+
 
 
 --- After Finish All Features
@@ -58,5 +65,5 @@ Unified tokenization for all models
 - Adjust position of "Get Report" button
 - Display dataframe of verses --- (done)
 - Add code comments
-- Remove any unused functions/code/styling
+- Remove any unused functions/code/styling <br><br>
 

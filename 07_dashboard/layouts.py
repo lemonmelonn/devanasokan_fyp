@@ -5,6 +5,8 @@ import dash_mantine_components as dmc
 from datetime import date, timedelta
 # import dash_ag_grid as dag
 
+from modelinfo import model_overview_card, data_preparation_card, performance_card
+
 
 # Layout for the dashboard
 def dashboard_menu():
@@ -363,11 +365,13 @@ def song_classification_page():
         )
     ], className="dashboard-page")
 
-# Graphs Layout
+# Model Info Layout
 def graphs():
     return html.Div([
-        html.H1("Model", className="page-title mb-4"),
-        html.P("This page will display various graphs and visualizations.", className="page-subtitle")
+        html.H1("Model Overview", className="page-title mb-4"),
+        model_overview_card(),
+        data_preparation_card(),
+        performance_card(),
     ], className="dashboard-page")
 
 # History Layout
