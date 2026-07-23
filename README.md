@@ -2,6 +2,10 @@
 Code repository for Final Year Project (Devan Asokan - Asia Pacific University) <br><br>
 
 
+### Hyperparameter
+
+Weight Decay - regularization technique that prevents a machine learning model from becoming overly complex, overconfident, or memorizing training data (overfitting)
+
 ### Possible Issues
 
 Labelling prompt
@@ -16,10 +20,19 @@ Unified tokenization for all models <br><br>
 
 --- Model Training
 - Tuning for other 3 models (need to test)
-- Find optimal hyperparameter range
-- Adjust number of epochs (3 or 4, instead of 2)
 - Understand exact processes in model training/hyperparameter tuning notebooks
 - Understand what is hidden size and attention heads in Bert and Distilbert <br><br>
+
+<br>
+-- Try for DistilBERT first
+
+- Why is validation loss keep increasing? IDK BREV
+- Can BERT actually use epochs?
+- Define different train, validation, test ratios
+- Find optimal hyperparameter range
+- Can i tune more hyperparameters? (only tuning 4 now)
+- Add patience in trainer initialization
+- Adjust number of epochs (5 or 10?)<br><br>
 
 
 --- General
