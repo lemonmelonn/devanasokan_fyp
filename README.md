@@ -4,7 +4,15 @@ Code repository for Final Year Project (Devan Asokan - Asia Pacific University) 
 
 ### Hyperparameter
 
+Learning Rate
 Weight Decay - regularization technique that prevents a machine learning model from becoming overly complex, overconfident, or memorizing training data (overfitting)
+Training Batch Size
+
+Warmup ratio?
+Label smoothing?
+
+Early stopping = 2, keep num_epochs constant
+
 
 ### Possible Issues
 
@@ -20,6 +28,7 @@ Unified tokenization for all models <br><br>
 
 --- Model Training
 - Tuning for other 3 models (need to test)
+- No need k-fold, just use different ratios
 - Understand exact processes in model training/hyperparameter tuning notebooks
 - Understand what is hidden size and attention heads in Bert and Distilbert <br><br>
 
