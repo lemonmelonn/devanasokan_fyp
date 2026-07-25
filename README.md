@@ -13,6 +13,8 @@ Label smoothing?
 
 Early stopping = 2, keep num_epochs constant
 
+Probably just continue with training normally, even if tuned parameters are not helping (just carry on)
+
 
 ### Possible Issues
 
