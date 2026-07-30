@@ -12,7 +12,7 @@ df = pd.concat([df_majority_downsampled, df_minority])
 
 # Save output
 print("After class balancing:", df.shape)
-df.to_csv('C:/Users/User/Documents/devanasokan_fyp/preparation/modeldata.csv', index=False, encoding='utf-8-sig')
+df.to_csv('C:/Users/User/Documents/devanasokan_fyp/modeldata/balanceddata.csv', index=False, encoding='utf-8-sig')
 
 
 
