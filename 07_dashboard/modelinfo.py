@@ -75,6 +75,27 @@ def performance_card():
                         html.Li("F1 Score: 89%"),
                     ]
                 ),
+                html.Div(
+                    [
+                        html.Div(
+                            html.Img(
+                                src="/assets/roc-auc.png",
+                                alt="ROC-AUC curve",
+                                className="performance-plot-img",
+                            ),
+                            className="performance-plot-item",
+                        ),
+                        html.Div(
+                            html.Img(
+                                src="/assets/confusionmatrix.png",
+                                alt="Confusion matrix",
+                                className="performance-plot-img",
+                            ),
+                            className="performance-plot-item",
+                        ),
+                    ],
+                    className="mt-3 performance-plot-row",
+                ),
             ]
         ),
         className="dashboard-card shadow-sm border-0 mb-4",

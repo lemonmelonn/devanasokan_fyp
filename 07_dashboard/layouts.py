@@ -107,7 +107,8 @@ def song_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H4(method, className="section-header mb-1"),
+                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px"}),
+                            
                             html.Div(
                                 [
                                     html.Span(track.get("title", "Unknown track"), className="track-title"),
