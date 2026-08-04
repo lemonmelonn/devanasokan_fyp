@@ -93,10 +93,10 @@ def performance_card():
                 ),
                 html.Ul(
                     [
-                        html.Li("Accuracy: 89.6%"),
-                        html.Li("Precision: 89%"),
-                        html.Li("Recall: 88%"),
-                        html.Li("F1 Score: 89%"),
+                        html.Li("Accuracy: 89.07%"),
+                        html.Li("Precision: 88.87%"),
+                        html.Li("Recall: 89.34%"),
+                        html.Li("F1 Score: 89.10%"),
                     ]
                 ),
                 html.Div(
