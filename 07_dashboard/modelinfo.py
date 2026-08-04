@@ -3,13 +3,12 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 
-
-# Model Overview Card
-def model_overview_card():
+# Outline Card
+def outline_card():
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Model Overview ----", className="card-title mb-3"),
+                html.H4("Outline", className="card-title mb-3"),
                 html.P(
                     """
                     This model classifies song lyrics into Appropriate and
@@ -22,6 +21,31 @@ def model_overview_card():
                         html.Li("Architecture: DistilBERT"),
                         html.Li("Framework: PyTorch"),
                         html.Li("Classes: Appropriate / Inappropriate"),
+                    ]
+                ),
+            ]
+        ),
+        className="dashboard-card shadow-sm border-0 mt-4 mb-4",
+    )
+
+# Model Info Card
+def model_info_card():
+    return dbc.Card(
+        dbc.CardBody(
+            [
+                html.H4("Model Info", className="card-title mb-3"),
+                html.P(
+                    """
+                    This model classifies song lyrics into Appropriate and
+                    Inappropriate categories using a fine-tuned DistilBERT model.
+                    """,
+                    className="mb-2",
+                ),
+                html.Ul(
+                    [
+                        html.Li("Learning Rate: 2e-5"),
+                        html.Li("Training Batch Size: 16"),
+                        html.Li("Weight Decay: 0.01"),
                     ]
                 ),
             ]
@@ -69,8 +93,8 @@ def performance_card():
                 ),
                 html.Ul(
                     [
-                        html.Li("Accuracy: 92%"),
-                        html.Li("Precision: 90%"),
+                        html.Li("Accuracy: 89.6%"),
+                        html.Li("Precision: 89%"),
                         html.Li("Recall: 88%"),
                         html.Li("F1 Score: 89%"),
                     ]

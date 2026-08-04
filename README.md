@@ -73,21 +73,16 @@ Unified tokenization for all models <br><br>
 - Dataset used, statistics (songs, verses, label, distribution)
 - Preprocessing steps
 - Best Hyperparameters
-- Confusion Matrix, Loss, Accuracy?
-- Comparison with other model <br><br>
+- Confusion Matrix, Loss, Accuracy? <br><br>
 
 
 
 --- After Finish All Features
 - Redesign UI
 - Adjust song card text size
-- Proper name for dashboard
-- Adjust modal size (make it less wide)
 - Adjust song card width in modal (make it smaller than modal to remove the bottom scroller)
 - Adjust width of column header (later, once all features are finalized)
-- Adjust size of album cover
 - Adjust position of "Get Report" button
-- Display dataframe of verses --- (done)
 - Add code comments
 - Remove any unused functions/code/styling <br><br>
 

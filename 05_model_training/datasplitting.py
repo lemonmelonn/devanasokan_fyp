@@ -44,3 +44,5 @@ val_df = pd.DataFrame({'verse': X_val, 'label': y_val})
 val_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/val10.csv", index=False)
 test_df = pd.DataFrame({'verse': X_test, 'label': y_test})
 test_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/test10.csv", index=False)
+
+

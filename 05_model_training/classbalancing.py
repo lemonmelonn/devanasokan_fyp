@@ -2,6 +2,7 @@ import pandas as pd
 
 df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/preparation/finalverses.csv")
 
+# Size before balancing
 print("Before class balancing:", df.shape)
 
 # Balance the dataset by undersampling the majority class
@@ -12,8 +13,9 @@ df = pd.concat([df_majority_downsampled, df_minority])
 
 # Save output
 print("After class balancing:", df.shape)
-df.to_csv('C:/Users/User/Documents/devanasokan_fyp/modeldata/balanceddata.csv', index=False, encoding='utf-8-sig')
-
+df.to_csv('C:/Users/User/Documents/devanasokan_fyp/modeldata/balanceddata.csv', 
+          index=False, 
+          encoding='utf-8-sig')
 
 
 
