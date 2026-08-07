@@ -5,6 +5,8 @@ import dash_mantine_components as dmc
 from datetime import date, timedelta
 # import dash_ag_grid as dag
 
+from modelinfo import model_info_card, data_preparation_card, outline_card, performance_card
+
 
 # Layout for the dashboard
 def dashboard_menu():
@@ -16,8 +18,8 @@ def dashboard_menu():
         className="dashboard-navbar",
         children=[
             dbc.NavItem(dbc.NavLink("Song Classification", href="/currently-listening")),
-            dbc.NavItem(dbc.NavLink("Model", href="/graphs")),
-            dbc.NavItem(dbc.NavLink("Song History", href="/song-history")), # Maybe not
+            dbc.NavItem(dbc.NavLink("Model Overview", href="/model")),
+            # dbc.NavItem(dbc.NavLink("Song History", href="/song-history")), # Maybe not
         ],
     )
 
@@ -105,7 +107,8 @@ def song_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H4(method, className="section-header mb-1"),
+                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px"}),
+                            
                             html.Div(
                                 [
                                     html.Span(track.get("title", "Unknown track"), className="track-title"),
@@ -363,11 +366,14 @@ def song_classification_page():
         )
     ], className="dashboard-page")
 
-# Graphs Layout
-def graphs():
+# Model Info Layout
+def model():
     return html.Div([
-        html.H1("Model", className="page-title mb-4"),
-        html.P("This page will display various graphs and visualizations.", className="page-subtitle")
+        html.H1("Model Overview", className="page-title mb-4"),
+        outline_card(),
+        model_info_card(),
+        data_preparation_card(),
+        performance_card(),
     ], className="dashboard-page")
 
 # History Layout

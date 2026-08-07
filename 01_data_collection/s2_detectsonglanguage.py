@@ -5,7 +5,7 @@ from tqdm import tqdm
 tqdm.pandas()
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/storage/songlist.csv")
+df = pd.read_csv("./storage/songlist.csv")
 print("Initial shape:", df.shape)
 
 
