@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 # Load dataset
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/datasource/top-10k-spotify-songs-2025-07-detailed.csv")
+df = pd.read_csv("./datasource/top-10k-spotify-songs-2025-07-detailed.csv")
 print("Initial shape:", df.shape)
 
 # Remove duplicates track_name and artist_names combos
