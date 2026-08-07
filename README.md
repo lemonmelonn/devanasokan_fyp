@@ -1,6 +1,10 @@
 # devanasokan_fyp
 Code repository for Final Year Project (Devan Asokan - Asia Pacific University) <br><br>
 
+### Notes
+
+Must restart kernel for every training session
+
 
 ### Hyperparameter
 
