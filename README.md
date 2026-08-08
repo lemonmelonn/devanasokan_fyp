@@ -82,6 +82,8 @@ Unified tokenization for all models <br><br>
 
 
 --- After Finish All Features
+- Add limitations of model
+- Design home page with general information
 - Redesign UI
 - Adjust song card text size
 - Adjust song card width in modal (make it smaller than modal to remove the bottom scroller)

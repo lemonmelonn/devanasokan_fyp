@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/balanceddata.csv")
+df = pd.read_csv("./modeldata/balanceddata.csv")
 
 # Select only the columns we need
 df = df[['verse', 'label']]
@@ -22,11 +22,11 @@ X_val, X_test, y_val, y_test = train_test_split(X_val_test, y_val_test, test_siz
 
 # Save the training, validation, and test sets to CSV files
 train_df = pd.DataFrame({'verse': X_train, 'label': y_train})
-train_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/train70.csv", index=False)
+train_df.to_csv("./modeldata/train70.csv", index=False)
 val_df = pd.DataFrame({'verse': X_val, 'label': y_val})
-val_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/val15.csv", index=False)
+val_df.to_csv("./modeldata/val15.csv", index=False)
 test_df = pd.DataFrame({'verse': X_test, 'label': y_test})
-test_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/test15.csv", index=False)
+test_df.to_csv("./modeldata/test15.csv", index=False)
 
 
 # ==== RATIO OF SPLIT (80/10/10) ====
@@ -39,10 +39,10 @@ X_val, X_test, y_val, y_test = train_test_split(X_val_test, y_val_test, test_siz
 
 # Save the training, validation, and test sets to CSV files
 train_df = pd.DataFrame({'verse': X_train, 'label': y_train})
-train_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/train80.csv", index=False)
+train_df.to_csv("./modeldata/train80.csv", index=False)
 val_df = pd.DataFrame({'verse': X_val, 'label': y_val})
-val_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/val10.csv", index=False)
+val_df.to_csv("./modeldata/val10.csv", index=False)
 test_df = pd.DataFrame({'verse': X_test, 'label': y_test})
-test_df.to_csv("C:/Users/User/Documents/devanasokan_fyp/modeldata/test10.csv", index=False)
+test_df.to_csv("./modeldata/test10.csv", index=False)
 
 
