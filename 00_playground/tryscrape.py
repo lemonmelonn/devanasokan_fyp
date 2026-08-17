@@ -1,6 +1,16 @@
 import requests
 import pandas as pd
 import time
+import re
+
+text = """(
+Metro
+)"""
+
+text = re.sub(r'\(\s*', '(', text)
+text = re.sub(r'\s*\)', ')', text)
+
+print(text)
 
 artist_name = "TWICE"
 
