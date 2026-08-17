@@ -234,6 +234,12 @@ def verse_label_table(verse_info=None, error=None):
     display_columns = ["section", "ori_verse", "label", "score"]
     table_data = verse_info.copy()
 
+    # Clean "ori_verse" column to remove line breaks and extra spaces   
+    table_data["ori_verse"] = table_data["ori_verse"].str.strip().str.replace("\n", " ")
+
+    # Remove whitespace after brackets in the "ori_verse" column
+    table_data["ori_verse"] = table_data["ori_verse"].str.replace(r'\(\s+', '(', regex=True).str.replace(r'\s+\)', ')', regex=True)
+
     for column in display_columns:
         if column not in table_data.columns:
             table_data[column] = ""

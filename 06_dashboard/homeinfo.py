@@ -270,7 +270,7 @@ layout = dbc.Container(
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H4("Percentage of Explicit Songs by Year in Billboard Top 100 Charts", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.H4("Trend of Use of Profanity in Song Lyrics", style={"fontSize": "1.1rem", "fontWeight": 600}),
                                 html.Img(src="/assets/profanitytrend.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
                                 html.P("(Source: Perera & Teh, 2025)"),
                             ]
