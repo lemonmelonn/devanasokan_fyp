@@ -14,7 +14,7 @@ import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from urllib.parse import urlparse, parse_qs
 
-from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model, song_history
+from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model_page, home_page
 from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
 from csv_functions import add_song_to_csv, check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label
@@ -46,17 +46,17 @@ def register_callbacks(app):
         pathname = parsed.path
 
         if pathname == "/":
-            print("Redirecting to /currently-listening")
-            return song_classification_page()
+            print("Redirecting to /home")
+            return home_page()
 
-        if pathname == "/song-history":
-            return song_history()
+        if pathname == "/home":
+            return home_page()
         
-        if pathname == "/currently-listening":
+        if pathname == "/classification":
             return song_classification_page()
 
         if pathname == "/model":
-            return model()
+            return model_page()
 
         return html.Div("404: Page not found", className="dashboard-page")
     
@@ -67,7 +67,7 @@ def register_callbacks(app):
         Input("get-current-song", "n_clicks")
     )
     def get_current_song(pathname, n_clicks):
-        if pathname not in ["/", "/currently-listening"]:
+        if pathname not in ["/", "/classification"]:
             raise PreventUpdate
 
         try:

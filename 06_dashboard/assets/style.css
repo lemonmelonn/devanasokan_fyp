@@ -1,5 +1,5 @@
 :root {
-  --font-sans: 'Inter', 'Plus Jakarta Sans', 'Geist', sans-serif;
+  --font-sans: 'Segoe UI', 'Plus Jakarta Sans', 'Geist', sans-serif;
   --bg-main: #09090b;
   --bg-main-alt: #0f172a;
   --bg-card: #1e1e24;
@@ -66,6 +66,12 @@ a {
   box-shadow: var(--shadow-md);
   background: rgba(15, 23, 42, 0.82);
   backdrop-filter: blur(12px);
+}
+
+.dashboard-navbar .navbar-brand {
+    font-size: 28px;
+    font-weight: 700;
+    margin-left: 20px;
 }
 
 .dashboard-navbar .navbar-brand,
@@ -320,6 +326,13 @@ a {
   }
 }
 
+.home-card {
+    background-color: #18181b;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    height: 100%;
+}
 
 .song-card{
     display:flex;

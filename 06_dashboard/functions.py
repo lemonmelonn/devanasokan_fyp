@@ -244,9 +244,17 @@ def clean_verses(song_id):
                 cleaned_text
             )
 
+            # # Fix line breaks before and after brackets
+            # cleaned_text = re.sub(r'\(\s*', '(', cleaned_text)
+            # cleaned_text = re.sub(r'\s*\)', ')', cleaned_text)
+
             cleaned_text = normalize_vocables(cleaned_text)
             cleaned_text = replace_shortened_words(cleaned_text)
             cleaned_text = cleaned_text.lower()
+
+            cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
+            cleaned_text = re.sub(r'\(\s+', '(', cleaned_text)
+            cleaned_text = re.sub(r'\s+\)', ')', cleaned_text)
 
         if verse_id is not None:
             update_clean_verse(song_id, verse_id, cleaned_text, "verselabels.csv")

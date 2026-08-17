@@ -2,24 +2,22 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from datetime import date, timedelta
-# import dash_ag_grid as dag
 
-from modelinfo import model_info_card, data_preparation_card, outline_card, performance_card
-
+import homeinfo
+import modelinfo
 
 # Layout for the dashboard
 def dashboard_menu():
     return dbc.NavbarSimple(
-        brand="LyricLens",
+        brand="LyricLens 🎶",
         color="primary",
         dark=True,
         fluid=True,
         className="dashboard-navbar",
         children=[
-            dbc.NavItem(dbc.NavLink("Song Classification", href="/currently-listening")),
-            dbc.NavItem(dbc.NavLink("Model Overview", href="/model")),
-            # dbc.NavItem(dbc.NavLink("Song History", href="/song-history")), # Maybe not
+            dbc.NavItem(dbc.NavLink("Project Overview", href="/home")),
+            dbc.NavItem(dbc.NavLink("Song Classification", href="/classification")),
+            dbc.NavItem(dbc.NavLink("Model Info", href="/model")),
         ],
     )
 
@@ -37,27 +35,28 @@ def song_card(track=None, error=None):
         className="dashboard-cover"
     )
 
-    if error:
-        return dbc.Card(
-            dbc.CardBody(
-                html.Div(
-                    [
-                        false_cover,
-                        html.Div(
-                            [
-                                html.H4("Something went wrong", className="section-header mb-2"),
-                                html.P("Unable to load the track right now.", className="section-body mb-1")
-                            ],
-                            className="flex-grow-1"
-                        ),
-                    ],
-                    className="d-flex align-items-center gap-3 flex-wrap"
-                )
-            ),
-            className="dashboard-card shadow-sm border-0"
-        )
+    # if error:
+    #     return dbc.Card(
+    #         dbc.CardBody(
+    #             html.Div(
+    #                 [
+    #                     false_cover,
+    #                     html.Div(
+    #                         [
+    #                             html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#20af28"}),
+    #                             html.H4("No track to analyze", className="section-header mb-2"),
+    #                             html.P("Please select a track to analyze.", className="section-body mb-1")
+    #                         ],
+    #                         className="flex-grow-1"
+    #                     ),
+    #                 ],
+    #                 className="d-flex align-items-center gap-3 flex-wrap"
+    #             )
+    #         ),
+    #         className="dashboard-card shadow-sm border-0"
+    #     )
 
-    if not track:
+    if not track or error:
         return dbc.Card(
             dbc.CardBody([
                 html.Div(
@@ -65,8 +64,9 @@ def song_card(track=None, error=None):
                         false_cover,
                         html.Div(
                             [
+                                html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#ffffff"}),
                                 html.H4("No Track Available", className="section-header mb-2"),
-                                html.P("No song is currently playing.", className="section-body mb-1")
+                                html.P("Please select a track to analyze.", className="section-body mb-1")
                             ],
                             className="flex-grow-1"
                         ),
@@ -107,11 +107,11 @@ def song_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px"}),
+                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#ffffff"}),
                             
                             html.Div(
                                 [
-                                    html.Span(track.get("title", "Unknown track"), className="track-title"),
+                                    html.Span(track.get("title", "Unknown track"), className="track-title", style={"color": "#20af28"}),
                                     explicit_badge,
                                 ],
                                 className="d-flex align-items-center flex-wrap",
@@ -279,7 +279,6 @@ def verse_label_table(verse_info=None, error=None):
 def song_classification_page():
     return html.Div([
         html.H1("Song Classification", className="page-title mb-4"),
-        # html.P("This page shows the currently playing song and related information.", className="page-subtitle"),
 
         dbc.Row(
             [
@@ -367,20 +366,17 @@ def song_classification_page():
     ], className="dashboard-page")
 
 # Model Info Layout
-def model():
+def model_page():
     return html.Div([
-        html.H1("Model Overview", className="page-title mb-4"),
-        outline_card(),
-        model_info_card(),
-        data_preparation_card(),
-        performance_card(),
+        html.H1("Model Information", className="page-title mb-4"),
+        html.Div(id="page-content", children=modelinfo.layout),
     ], className="dashboard-page")
 
-# History Layout
-def song_history():
+# Home Page Layout
+def home_page():
     return html.Div([
-        html.H1("Song History", className="page-title mb-4"),
-        html.P("This page will display the history of songs played.", className="page-subtitle")
+        html.H1("Project Overview", className="page-title mb-4"),
+        html.Div(id="page-content", children=homeinfo.layout),
     ], className="dashboard-page")
 
 # App Layout

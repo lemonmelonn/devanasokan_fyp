@@ -8,7 +8,6 @@ def outline_card():
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Outline", className="card-title mb-3"),
                 html.P(
                     """
                     This model classifies song lyrics into Appropriate and
@@ -33,7 +32,6 @@ def model_info_card():
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Model Info", className="card-title mb-3"),
                 html.P(
                     """
                     This model classifies song lyrics into Appropriate and
@@ -59,7 +57,6 @@ def data_preparation_card():
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Data Preparation", className="card-title mb-3"),
                 html.P(
                     """
                     The dataset was preprocessed to clean and tokenize the lyrics.
@@ -84,7 +81,6 @@ def performance_card():
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Model Performance", className="card-title mb-3"),
                 html.P(
                     """
                     The model's performance is evaluated using standard metrics.
@@ -99,28 +95,76 @@ def performance_card():
                         html.Li("F1 Score: 89.10%"),
                     ]
                 ),
-                html.Div(
-                    [
-                        html.Div(
-                            html.Img(
-                                src="/assets/roc-auc.png",
-                                alt="ROC-AUC curve",
-                                className="performance-plot-img",
-                            ),
-                            className="performance-plot-item",
-                        ),
-                        html.Div(
-                            html.Img(
-                                src="/assets/confusionmatrix.png",
-                                alt="Confusion matrix",
-                                className="performance-plot-img",
-                            ),
-                            className="performance-plot-item",
-                        ),
-                    ],
-                    className="mt-3 performance-plot-row",
-                ),
             ]
         ),
         className="dashboard-card shadow-sm border-0 mb-4",
     )
+
+layout = dbc.Container(
+    [
+        html.H2("Outline", className="section-header mb-3"),
+        outline_card(),
+        html.Div(style={"height": "1.5rem"}),
+        model_info_card(),
+
+        html.Div(style={"height": "1.5rem"}),
+        html.H2("Data Preparation", className="section-header mb-3"),
+        data_preparation_card(),
+
+        
+        html.Div(style={"height": "1.5rem"}),
+        html.H2("Model Performance", className="section-header mb-3"),
+        performance_card(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H4("ROC-AUC Curve", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.Img(src="/assets/roc-auc.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
+                            ]
+                        ),
+                        style={
+                            "backgroundColor": "#18181b",
+                            "border": "1px solid rgba(255,255,255,0.08)",
+                            "borderRadius": "12px",
+                            "boxShadow": "0 10px 25px rgba(15, 23, 42, 0.25)",
+                            "height": "100%",
+                        },
+                    ),
+                    width=12,
+                    lg=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H4("Confusion Matrix", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.Img(src="/assets/confusionmatrix.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
+                            ]
+                        ),
+                        style={
+                            "backgroundColor": "#18181b",
+                            "border": "1px solid rgba(255,255,255,0.08)",
+                            "borderRadius": "12px",
+                            "boxShadow": "0 10px 25px rgba(15, 23, 42, 0.25)",
+                            "height": "100%",
+                        },
+                    ),
+                    width=12,
+                    lg=6,
+                ),
+            ],
+            className="g-4 mt-1",
+        ),
+
+    ],
+    fluid=True,
+    style={
+        "backgroundColor": "#09090b",
+        "color": "#f8fafc",
+        "padding": "2rem 1.5rem 4rem",
+        "minHeight": "100vh",
+    },
+)
