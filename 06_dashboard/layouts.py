@@ -64,7 +64,7 @@ def song_card(track=None, error=None):
                         false_cover,
                         html.Div(
                             [
-                                html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#ffffff"}),
+                                html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0E48B2"}),
                                 html.H4("No Track Available", className="section-header mb-2"),
                                 html.P("Please select a track to analyze.", className="section-body mb-1")
                             ],
@@ -107,11 +107,11 @@ def song_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#ffffff"}),
+                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0E48B2"}),
                             
                             html.Div(
                                 [
-                                    html.Span(track.get("title", "Unknown track"), className="track-title", style={"color": "#20af28"}),
+                                    html.Span(track.get("title", "Unknown track"), className="track-title"),
                                     explicit_badge,
                                 ],
                                 className="d-flex align-items-center flex-wrap",

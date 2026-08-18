@@ -15,7 +15,7 @@ import dash_mantine_components as dmc
 from urllib.parse import urlparse, parse_qs
 
 from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model_page, home_page
-from functions import load_model, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
+from functions import load_model_from_hf, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
 from csv_functions import add_song_to_csv, check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # print(ALL)
 
 # Load the classifier model and get the Spotify access token
-CLASSIFIER = load_model()
+CLASSIFIER = load_model_from_hf()
 TOKEN = get_access_token()
 
 # Global variable to store the last fetched song ID

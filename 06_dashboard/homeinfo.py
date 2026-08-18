@@ -13,7 +13,7 @@ def stat_card(value, label, accent="#10b981"):
                     style={
                         "fontSize": "2rem",
                         "fontWeight": 700,
-                        "color": "#b98610",
+                        "color": "#0E48B2",
                         "lineHeight": 1.2,
                     },
                 ),

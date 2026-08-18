@@ -23,15 +23,13 @@ genius = lyricsgenius.Genius(
     retries=3
 )
 
-# Load the model and tokenizer from local folder
-def load_model():
-    # Load the model and tokenizer from your local folder
-    path = "./06_dashboard/my_final_model"
-    model = AutoModelForSequenceClassification.from_pretrained(path)
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased") # Ensure tokenizer has been saved
-
-    # Create a 'pipeline' (the easiest way to use the model)
-    classifier = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
+# Load the model from Hugging Face Hub using the pipeline API
+def load_model_from_hf():
+    classifier = pipeline(
+        "text-classification",
+        model="devanasokan/bert-lyrics-classifier",
+    )
+    print("Trained BERT model loaded from Hugging Face Hub.")
     return classifier
 
 # Function to detect if a song is explicit based on Spotify metadata
