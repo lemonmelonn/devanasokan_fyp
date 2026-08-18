@@ -13,7 +13,7 @@ def stat_card(value, label, accent="#10b981"):
                     style={
                         "fontSize": "2rem",
                         "fontWeight": 700,
-                        "color": "#0E48B2",
+                        "color": "#0ea5e9",
                         "lineHeight": 1.2,
                     },
                 ),
@@ -101,7 +101,7 @@ layout = dbc.Container(
                                 style={
                                     "fontSize": "0.78rem",
                                     "fontWeight": 600,
-                                    "color": "#94a3b8",
+                                    "color": "#0ea5e9",
                                     "textTransform": "uppercase",
                                     "letterSpacing": "0.08em",
                                     "marginBottom": "0.9rem",
@@ -174,7 +174,7 @@ layout = dbc.Container(
                             [
                                 html.H2(
                                     "The Problem & Motivation",
-                                    style={"fontSize": "2.0rem", "fontWeight": 700, "marginBottom": "1rem"},
+                                    style={"fontSize": "2.0rem", "fontWeight": 700, "marginBottom": "1rem", "color": "#0ea5e9"},
                                 ),
                                 html.P(
                                     "Digital music consumption is rising rapidly among children and young listeners, while lyrical content is becoming increasingly explicit, violent, and psychologically mature.",
@@ -200,7 +200,7 @@ layout = dbc.Container(
                             [
                                 html.H2(
                                     "The Solution & Impact",
-                                    style={"fontSize": "2.0rem", "fontWeight": 700, "marginBottom": "1rem"},
+                                    style={"fontSize": "2.0rem", "fontWeight": 700, "marginBottom": "1rem", "color": "#0ea5e9"},
                                 ),
                                 html.P(
                                     "This system bridges the gap between surface-level music metadata and child safety by using context-aware transformer models to classify lyrics at the verse level.",
@@ -239,7 +239,7 @@ layout = dbc.Container(
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H4("Presence of Explicit Songs across Genres on Billboard Charts", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.H4("Presence of Explicit Songs across Genres on Billboard Charts", style={"fontSize": "1.1rem", "fontWeight": 600, "color": "#0ea5e9"}),
                                 html.Img(src="/assets/percentageofexplicit.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
                                 html.P("(Source: Parris, 2023)"),
                             ]
@@ -252,7 +252,7 @@ layout = dbc.Container(
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H4("Percentage of Explicit Songs by Year in Billboard Top 100 Charts", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.H4("Percentage of Explicit Songs by Year in Billboard Top 100 Charts", style={"fontSize": "1.1rem", "fontWeight": 600, "color": "#0ea5e9"}),
                                 html.Img(src="/assets/riseofexplicit.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
                                 html.P("(Source: Chandra et al., 2025)"),
                             ]
@@ -270,7 +270,7 @@ layout = dbc.Container(
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H4("Trend of Use of Profanity in Song Lyrics", style={"fontSize": "1.1rem", "fontWeight": 600}),
+                                html.H4("Trend of Use of Profanity in Song Lyrics", style={"fontSize": "1.1rem", "fontWeight": 600, "color": "#0ea5e9"}),
                                 html.Img(src="/assets/profanitytrend.png", style={"width": "100%", "height": "auto", "marginBottom": "1rem"}),
                                 html.P("(Source: Perera & Teh, 2025)"),
                             ]
@@ -301,7 +301,7 @@ layout = dbc.Container(
                                         "👨‍👩‍👧‍👦",
                                         style={"fontSize": "2rem", "marginBottom": "0.8rem"},
                                     ),
-                                    html.H4("Parents & Guardians", style={"fontSize": "1.05rem", "fontWeight": 700}),
+                                    html.H4("Parents & Guardians", style={"fontSize": "1.05rem", "fontWeight": 700, "color": "#0ea5e9"}),
                                     html.P(
                                         "Have a reliable method for evaluating whether song lyrics are appropriate for their children, without requiring manual review.",
                                         style={"color": "#cbd5e1", "lineHeight": 1.7},
@@ -320,7 +320,7 @@ layout = dbc.Container(
                                         "🎧",
                                         style={"fontSize": "2rem", "marginBottom": "0.8rem"},
                                     ),
-                                    html.H4("Music Streaming Platforms", style={"fontSize": "1.05rem", "fontWeight": 700}),
+                                    html.H4("Music Streaming Platforms", style={"fontSize": "1.05rem", "fontWeight": 700, "color": "#0ea5e9"}),
                                     html.P(
                                         "Improve the accuracy of explicit content labelling by detecting the context of potential inappropriate lyrics, rather than relying fully on keyword-based tagging.",
                                         style={"color": "#cbd5e1", "lineHeight": 1.7},
@@ -339,7 +339,7 @@ layout = dbc.Container(
                                         "📱",
                                         style={"fontSize": "2rem", "marginBottom": "0.8rem"},
                                     ),
-                                    html.H4("Social Media Platforms", style={"fontSize": "1.05rem", "fontWeight": 700}),
+                                    html.H4("Social Media Platforms", style={"fontSize": "1.05rem", "fontWeight": 700, "color": "#0ea5e9"}),
                                     html.P(
                                         "Detect the use of songs with inappropriate lyrics in user-generated content, where original explicit labels may not be preserved",
                                         style={"color": "#cbd5e1", "lineHeight": 1.7},

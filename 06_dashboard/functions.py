@@ -400,23 +400,3 @@ def get_llm_explanation(song_id, CSV_FILE):
     else:
         # Return existing explanation from csv
         return llm_info
-
-   
-
-# -------------------------------- TESTING --------------------------------
-
-# # classifier = load_model()
-
-# artist = "Drake"
-# track = "passionfruit"
-
-# # song_id = 2
-# # update_song_label(song_id, "UNSAFE")
-
-# full_song = get_structured_lyrics(artist, track)
-# print(full_song[:100])
-
-# verses = clean_verses(track, full_song)
-# # for verse in verses["lyrics"]:
-# #     get_model_output(classifier, [verse])
-# #     print("\n---\n")

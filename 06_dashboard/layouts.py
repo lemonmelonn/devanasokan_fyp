@@ -64,7 +64,7 @@ def song_card(track=None, error=None):
                         false_cover,
                         html.Div(
                             [
-                                html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0E48B2"}),
+                                html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0ea5e9"}),
                                 html.H4("No Track Available", className="section-header mb-2"),
                                 html.P("Please select a track to analyze.", className="section-body mb-1")
                             ],
@@ -107,7 +107,7 @@ def song_card(track=None, error=None):
                     cover,
                     html.Div(
                         [
-                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0E48B2"}),
+                            html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0ea5e9"}),
                             
                             html.Div(
                                 [
@@ -136,7 +136,7 @@ def song_label_card(label=None, error=None):
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Label", className="section-header mb-2"),
+                html.H4("Song Label", className="section-header mb-2", style={"color": "#0ea5e9"}),
                 html.P("Unable to determine the song label right now.", className="section-body mb-1"),
                 html.Small(str(error), className="section-meta"),
                 html.Br(),
@@ -156,7 +156,7 @@ def song_label_card(label=None, error=None):
     if not label:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Label", className="section-header mb-2"),
+                html.H4("Song Label", className="section-header mb-2", style={"color": "#0ea5e9"}),
                 html.P("No label has been determined for the current song.", className="section-body mb-0"),
                 html.Br(),
                 html.P(
@@ -190,7 +190,7 @@ def song_label_card(label=None, error=None):
         dbc.CardBody([
             html.Div(
                 [
-                    html.H4("Song Label", className="section-header mb-1"),
+                    html.H4("Song Label", className="section-header mb-1", style={"color": "#0ea5e9"}),
                     html.Br(),
                     label_badge,
                     html.Br(),
@@ -215,7 +215,7 @@ def verse_label_table(verse_info=None, error=None):
     if error:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Verses", className="section-header mb-2"),
+                html.H4("Song Verses", className="section-header mb-2", style={"color": "#0ea5e9"}),
                 html.P("Unable to load the verses for this song right now.", className="section-body mb-1"),
                 html.Small(str(error), className="section-meta")
             ]),
@@ -225,7 +225,7 @@ def verse_label_table(verse_info=None, error=None):
     if verse_info is None or len(verse_info) == 0:
         return dbc.Card(
             dbc.CardBody([
-                html.H4("Song Verses", className="section-header mb-2"),
+                html.H4("Song Verses", className="section-header mb-2", style={"color": "#0ea5e9"}),
                 html.P("No verses are available for this song yet.", className="section-body mb-0")
             ]),
             className="dashboard-card shadow-sm border-0"
@@ -310,9 +310,9 @@ def song_classification_page():
 
         html.Div(
             [
-                dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button"),
+                dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button me-2"),
                 dbc.Button("Spotify", id="get-current-song", color="primary", className="dashboard-button"),
-                dbc.Button("Get Report", id="predict-button", color="primary", className="dashboard-button"),
+                dbc.Button("Get Report", id="predict-button", color="primary", className="dashboard-button ms-auto"),
             ],
             className="button-row mt-2"
         ),
