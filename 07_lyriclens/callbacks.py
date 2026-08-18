@@ -1,23 +1,15 @@
 # callbacks.py
 import logging
-import pickle
 import re
-from unittest import result
-import ollama
 import pandas as pd
-import io  # Add this import
-import os  # Add this import for environment variables
-from datetime import date, datetime, timedelta
-from dash import Input, Output, State, callback, callback_context, ALL, ctx, html, dcc, dash_table, dash, no_update
+from dash import Input, Output, State, callback, ALL, ctx, html, no_update
 from dash.exceptions import PreventUpdate
-import dash_bootstrap_components as dbc
-import dash_mantine_components as dmc
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 
 from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model_page, home_page
-from functions import load_model_from_hf, get_song_details, detect_explicit, get_structured_lyrics, split_verses, clean_verses, get_model_output
+from functions import load_model_from_hf, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
-from csv_functions import add_song_to_csv, check_song_exists, retrieve_song_info, retrieve_verse_info, update_song_label
+from data import init_dashboard_data
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +18,6 @@ logger = logging.getLogger(__name__)
 # Load the classifier model and get the Spotify access token
 CLASSIFIER = load_model_from_hf()
 TOKEN = get_access_token()
-
-# Global variable to store the last fetched song ID
-SONG_ID = None
-SONG_TITLE = None
-SONG_ARTIST = None
-SONG_EXPLICIT = None
-
-SONG_LABEL = None  # Global variable to store the song label
 
 def register_callbacks(app):
     
@@ -63,6 +47,7 @@ def register_callbacks(app):
     # Callback to fetch the currently playing song and update the song card
     @app.callback(
         Output("currently-listening-content", "children"),
+        Output("selected-song", "data"),
         Input("url", "pathname"),
         Input("get-current-song", "n_clicks")
     )
@@ -74,13 +59,8 @@ def register_callbacks(app):
             # Fetch the currently playing track from Spotify
             current_track = get_currently_playing()
 
-            # Update global variables with song details
-            global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT
-            SONG_ID = current_track.get("song_id")
-            SONG_TITLE = current_track.get("title")
-            SONG_ARTIST = current_track.get("artist")
-            SONG_EXPLICIT = current_track.get("explicit")
-            
+            if not current_track:
+                return song_card(error="No currently playing track found"), no_update
 
             # Add method to track details
             current_track["method"] = "Currently Listening"
@@ -88,22 +68,42 @@ def register_callbacks(app):
             # Print selected song details for debugging
             print(f"\n[DEBUG] Current song: {current_track['title']} by {current_track['artist']}")
 
-            # Print global variables for debugging
-            logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, SONG_EXPLICIT={SONG_EXPLICIT}\n")
+            logger.info(
+                "Fetched Spotify song details: SONG_ID=%s, SONG_TITLE=%s, SONG_ARTIST=%s, SONG_EXPLICIT=%s",
+                current_track.get("song_id"),
+                current_track.get("title"),
+                current_track.get("artist"),
+                current_track.get("explicit"),
+            )
 
         except Exception as exc:
             logger.exception("Failed to fetch currently playing track")
-            return song_card(error=exc)
+            return song_card(error=exc), no_update
 
-        return song_card(current_track)
+        selected_song = {
+            "song_id": current_track.get("song_id"),
+            "title": current_track.get("title"),
+            "artist": current_track.get("artist"),
+            "album": current_track.get("album"),
+            "album_image": current_track.get("album_image"),
+            "explicit": current_track.get("explicit"),
+            "method": current_track.get("method"),
+        }
+
+        return song_card(current_track), selected_song
     
     # Callback to predict the song label and update the song label card and verse label table
     @app.callback(
         Output("song-label-output", "children"),
         Output("verse-table-output", "children"),
-        Input("predict-button", "n_clicks")
+        Output("song-label-store", "data"),
+        Output("dashboard-data-store", "data"),
+        Input("predict-button", "n_clicks"),
+        State("selected-song", "data"),
+        State("dashboard-data-store", "data"),
+        prevent_initial_call=True
     )
-    def predict_song_label(n_clicks):
+    def predict_song_label(n_clicks, selected_song, dashboard_data):
 
         # Check if the predict button has been clicked
         print(f"Predict button clicked {n_clicks} times.")
@@ -111,62 +111,64 @@ def register_callbacks(app):
         if n_clicks is None:
             raise PreventUpdate
 
-        if SONG_ID is None:
-            return song_label_card(error="No song selected"), verse_label_table()
+        if not selected_song or not selected_song.get("song_id"):
+            return song_label_card(error="No song selected"), verse_label_table(), None, no_update
 
         try:
-            verse_info = None
+            song_id = str(selected_song.get("song_id"))
+            song_title = selected_song.get("title") or ""
+            song_artist = selected_song.get("artist") or ""
+            song_explicit = selected_song.get("explicit")
 
-            # Use the loaded classifier to predict the song label
-            exists = check_song_exists(SONG_ID)
+            dashboard_data = init_dashboard_data(dashboard_data)
+            cached_song = dashboard_data["songs_by_id"].get(song_id)
+            cached_verses = dashboard_data["verses_by_song_id"].get(song_id)
 
-            # If record does not exist, add song details
-            if not exists:
-                # Add the song to the CSV file
-                add_song_to_csv(SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT)
+            if cached_song and cached_verses:
+                verse_info = pd.DataFrame(cached_verses)
+                if "score" in verse_info.columns:
+                    verse_info["score"] = verse_info["score"].apply(
+                        lambda x: f"{x * 100:.3f}%" if isinstance(x, (int, float)) else x
+                    )
+                song_label = cached_song.get("ovr_label")
+                return song_label_card(label=song_label), verse_label_table(verse_info=verse_info), song_label, dashboard_data
 
-                # Clean the song title to remove any text in parentheses for better lyric fetching
-                cleansongtitle = re.sub(r'\s*\(.*?\)\s*', '', SONG_TITLE)  # Remove text in parentheses
+            # Clean the song title to remove any text in parentheses for better lyric fetching
+            cleansongtitle = re.sub(r'\s*\(.*?\)\s*', '', song_title)
                 
-                # Fetch structured lyrics
-                full_song = get_structured_lyrics(SONG_ARTIST, cleansongtitle)
+            # Fetch structured lyrics
+            full_song = get_structured_lyrics(song_artist, cleansongtitle)
+            if not full_song:
+                return song_label_card(error="Lyrics not found for this track"), verse_label_table(), None, no_update
                 
-                # Split the lyrics into verses and clean them
-                split_verses(SONG_ID, full_song)        
-                text = clean_verses(SONG_ID)
+            # Split, clean, and classify in memory.
+            verse_records = split_verses(song_id, full_song)
+            verse_records = clean_verses(verse_records)
 
-                # Use the classifier to get the overall label for the song
-                ovr_label = get_model_output(CLASSIFIER, SONG_ID, "verselabels.csv")
+            # Use the classifier to get the overall label for the song
+            verse_records, ovr_label = get_model_output(CLASSIFIER, verse_records)
 
-                logger.info(f"Overall label for the song: {ovr_label}")
+            logger.info(f"Overall label for the song: {ovr_label}")
+            dashboard_data["songs_by_id"][song_id] = {
+                "song_id": song_id,
+                "title": song_title,
+                "artist": song_artist,
+                "explicit": song_explicit,
+                "ovr_label": ovr_label,
+            }
+            dashboard_data["verses_by_song_id"][song_id] = verse_records
 
-                update_song_label(SONG_ID, ovr_label)
-                
-                maininfo = retrieve_song_info(SONG_ID)
-                #print(maininfo)
-                    
-            # If record exists, retrieve and print details
-            else:
-                print(f"\nSong ID {SONG_ID} already exists.")
-                maininfo = retrieve_song_info(SONG_ID)
-                print(maininfo)
-
-            # Retrieve verse information for the song
-            verse_info = retrieve_verse_info(SONG_ID, "verselabels.csv")
-            # if verse_info is not None:
-            #     print(verse_info)
-            # print(maininfo)
-            # print(f"\n[DEBUG] Retrieved verse information for Song ID {SONG_ID}: {verse_info.shape()}")
-
-
-            # Get the overall label for the song from maininfo
-            song_label = maininfo.get("ovr_label") if maininfo else None
+            verse_info = pd.DataFrame(verse_records)
+            if "score" in verse_info.columns:
+                verse_info["score"] = verse_info["score"].apply(
+                    lambda x: f"{x * 100:.3f}%" if isinstance(x, (int, float)) else x
+                )
 
         except Exception as exc:
             logger.exception("Failed to predict song label")
-            return song_label_card(error=exc), verse_label_table(error=exc)
+            return song_label_card(error=exc), verse_label_table(error=exc), None, no_update
 
-        return song_label_card(label=song_label), verse_label_table(verse_info=verse_info)
+        return song_label_card(label=ovr_label), verse_label_table(verse_info=verse_info), ovr_label, dashboard_data
     
 
     # Try manual search modal callbacks
@@ -243,7 +245,7 @@ def register_callbacks(app):
 
     # Callback to handle song selection and update the song card
     @callback(
-        Output("selected-song", "data"),
+        Output("selected-song", "data", allow_duplicate=True),
         Output("manual-search-modal", "is_open", allow_duplicate=True),
         Output("currently-listening-content", "children", allow_duplicate=True),
         Output("input-song-name", "value"),
@@ -274,13 +276,6 @@ def register_callbacks(app):
 
         selected = songs[index]
 
-        # Update global variables with song details
-        global SONG_ID, SONG_TITLE, SONG_ARTIST, SONG_EXPLICIT
-        SONG_ID = selected.get("song_id")
-        SONG_TITLE = selected.get("title")
-        SONG_ARTIST = selected.get("artist")
-        SONG_EXPLICIT = selected.get("explicit")
-
         # Add method to track details
         selected["method"] = "Manual Search"
 
@@ -290,8 +285,13 @@ def register_callbacks(app):
         # Print selected song details for debugging
         print(f"\n[DEBUG] Selected song: {selected['title']} by {selected['artist']}")
 
-        # Print global variables for debugging
-        logger.info(f"Fetched song details: SONG_ID={SONG_ID}, SONG_TITLE={SONG_TITLE}, SONG_ARTIST={SONG_ARTIST}, SONG_EXPLICIT={SONG_EXPLICIT}\n")
+        logger.info(
+            "Fetched manual song details: SONG_ID=%s, SONG_TITLE=%s, SONG_ARTIST=%s, SONG_EXPLICIT=%s",
+            selected.get("song_id"),
+            selected.get("title"),
+            selected.get("artist"),
+            selected.get("explicit"),
+        )
 
         # Return output
         return {
@@ -305,25 +305,33 @@ def register_callbacks(app):
         }, False, song_card(selected), ""
     
 
-    # Callback to clear info when new song is selected from modal
+    # Clear label and verse display whenever the selected song changes.
     @app.callback(
         Output("song-label-output", "children", allow_duplicate=True),
         Output("verse-table-output", "children", allow_duplicate=True),
-        Input({"type": "song-card", "index": ALL}, "n_clicks"),
+        Output("song-label-store", "data", allow_duplicate=True),
+        Input("selected-song", "data"),
+        State("dashboard-data-store", "data"),
         prevent_initial_call=True
     )
-    def clear_labels(n_clicks_list):
-        
-        return song_label_card(label=None), verse_label_table(verse_info=None)
+    def clear_labels_on_song_change(selected_song, dashboard_data):
+        if not selected_song or not selected_song.get("song_id"):
+            raise PreventUpdate
 
-    
-    # Callback to clear info when "Current Song" button is clicked
-    @app.callback(
-        Output("song-label-output", "children", allow_duplicate=True),
-        Output("verse-table-output", "children", allow_duplicate=True),
-        Input("get-current-song", "n_clicks"),
-        prevent_initial_call=True
-    )
-    def clear_labels(n_clicks):
-        
-        return song_label_card(label=None), verse_label_table(verse_info=None)
+        dashboard_data = init_dashboard_data(dashboard_data)
+        song_id = str(selected_song.get("song_id"))
+
+        cached_song = dashboard_data["songs_by_id"].get(song_id)
+        cached_verses = dashboard_data["verses_by_song_id"].get(song_id)
+
+        if cached_song and cached_verses:
+            verse_info = pd.DataFrame(cached_verses)
+            if "score" in verse_info.columns:
+                verse_info["score"] = verse_info["score"].apply(
+                    lambda x: f"{x * 100:.3f}%" if isinstance(x, (int, float)) else x
+                )
+
+            song_label = cached_song.get("ovr_label")
+            return song_label_card(label=song_label), verse_label_table(verse_info=verse_info), song_label
+
+        return song_label_card(label=None), verse_label_table(verse_info=None), None

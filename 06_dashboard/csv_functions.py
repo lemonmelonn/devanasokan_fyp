@@ -268,8 +268,11 @@ def retrieve_verse_info(song_id, CSV_FILE):
     # Retrieve all rows for the song
     verses_df = df[df["song_id"] == song_id]
 
-    # Round the confidence score to 5 decimal places
-    verses_df["score"] = verses_df["score"].apply(lambda x: round(float(x), 5) if pd.notna(x) else x)
+    # # Round the confidence score to 5 decimal places
+    # verses_df["score"] = verses_df["score"].apply(lambda x: round(float(x), 5) if pd.notna(x) else x)
+
+    # Convert the score column to percentage format
+    verses_df["score"] = verses_df["score"].apply(lambda x: f"{x*100:.3f}%" if pd.notna(x) else x)
 
     return verses_df
 

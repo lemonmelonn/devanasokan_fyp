@@ -9,7 +9,6 @@ import pandas as pd
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 import ollama
 
-from csv_functions import add_verses, update_clean_verse, update_song_info, update_verse_label_score
 from spotify_functions import get_song_details
 
 # Load environment variables from .env
@@ -102,53 +101,32 @@ def split_verses(song_id, fullsong):
     
     split_song = split_lyrics_sections(fixed_song)
 
-    verses = []
+    records = []
     verse_id = 1
-    for _, verse_text in split_song:
-        verses.append(verse_text)
-        add_verses(song_id, verse_id, _, verse_text, "verselabels.csv")
+    for section_name, verse_text in split_song:
+        records.append(
+            {
+                "song_id": str(song_id),
+                "verse_id": str(verse_id),
+                "section": section_name,
+                "ori_verse": verse_text,
+                "clean_verse": "",
+                "label": "",
+                "score": "",
+            }
+        )
         verse_id += 1
-        print(f"Verse: {verse_text[:30]}...\n")  # Print the first 30 characters of each verse for verification
+        print(f"Verse: {verse_text[:30]}...\n")
 
-    # Save as df
-    df = pd.DataFrame({"ori_verse": verses})
-
-    # Format verses into a single line (separated by commas)
-    df['verse'] = df['ori_verse'].apply(lambda x: ', '.join(x.splitlines()))
-
-    # Check if only one verse exists
-    # If yes, split them into multiple verses after 8 lines
-    if len(df) == 1:
-        single_verse = df.iloc[0]['verse']
-        lines = single_verse.splitlines()
-        if len(lines) > 8:
-            # Split into multiple verses of 8 lines each
-            split_verses = [lines[i:i + 8] for i in range(0, len(lines), 8)]
-            df = pd.DataFrame({"verse": ['\n'.join(v) for v in split_verses]})
-            print(f"Split single verse into {len(split_verses)} verses.")
-        else:
-            print("Single verse has 8 or fewer lines; no splitting needed.")
-
-    return df
+    return records
 
 
 # Clean the verses by removing unwanted characters, fixing contractions, and normalizing text
-def clean_verses(song_id):
+def clean_verses(verse_records):
+    if not verse_records:
+        return []
 
-    # Read from verselabels.csv
-    df = pd.read_csv("verselabels.csv", dtype={"song_id": "str"}, keep_default_na=False)
-    song_df = df[df["song_id"] == str(song_id)]
-    print(f"Number of verses for Song ID {song_id}: {len(song_df)}")
-
-    if "clean_verse" in song_df.columns:
-        uncleaned_verse = song_df[
-            song_df["clean_verse"].isna() |
-            (song_df["clean_verse"].astype(str).str.strip() == "")
-        ]
-    else:
-        uncleaned_verse = song_df
-
-    print(f"Number of uncleaned verses for Song ID {song_id}: {len(uncleaned_verse)}")
+    print(f"Number of verses to clean: {len(verse_records)}")
 
     cleaned_verses = []
 
@@ -224,8 +202,7 @@ def clean_verses(song_id):
             text = text.replace(short, full)
         return text
 
-    for _, verse_row in uncleaned_verse.iterrows():
-        verse_id = verse_row.get("verse_id")
+    for verse_row in verse_records:
         text = verse_row.get("ori_verse", "")
         print(f"Original verse: {str(text)[:30]}...")
 
@@ -249,56 +226,24 @@ def clean_verses(song_id):
             # Remove line breaks
             cleaned_text = cleaned_text.strip().replace("\n", " ")
 
-        if verse_id is not None:
-            update_clean_verse(song_id, verse_id, cleaned_text, "verselabels.csv")
-
+        verse_row["clean_verse"] = cleaned_text
         cleaned_verses.append(cleaned_text)
 
-    return "\n\n".join(cleaned_verses)
+    return verse_records
 
 
-# Loop verses through the model and print results
-# def get_model_output(classifier, verses_list):
-#     print(f"Number of verses: {len(verses_list)}")
-#     verses = []
-#     labels = []
-#     scores = []
-#     for verse in verses_list:
-#         result = classifier(verse)
-#         verses.append(verse)
-#         labels.append(result[0]["label"])
-#         scores.append(result[0]["score"])
-
-#     # Save as df
-#     # Only saving the last record, must find out why
-#     df = pd.DataFrame({"ori_verse": verses, "label": labels, "score": scores})
-#     df.to_csv("model_output.csv", index=False)
-
-
-def get_model_output(classifier, song_id, CSV_FILE):
-
-    # 1. Load CSV
-    df = pd.read_csv(CSV_FILE, dtype={"song_id": str, "verse_id": str, "label": str}, keep_default_na=False)
-    df["score"] = pd.to_numeric(df["score"], errors="coerce")
-
-    # 2. Filter song by song_id
-    song_df = df[df["song_id"] == str(song_id)].copy()
-
-    print(f"Number of verses: {len(song_df)}")
-
+def get_model_output(classifier, verse_records):
     label_list = []
-    # 3. Loop through each verse in that song
-    for idx, row in song_df.iterrows():
 
-        verse = row["clean_verse"]
-
-        # skip empty / uncleaned verses
-        if pd.isna(verse) or verse.strip() == "":
+    for row in verse_records:
+        verse = (row.get("clean_verse") or "").strip()
+        if not verse:
+            row["label"] = ""
+            row["score"] = ""
             continue
 
         result = classifier(verse)
 
-        # Get label and map to "SAFE" or "UNSAFE"
         label = result[0]["label"]
         if label == "LABEL_0":
             label = "SAFE"
@@ -306,97 +251,13 @@ def get_model_output(classifier, song_id, CSV_FILE):
             label = "UNSAFE"
         else:
             label = "UNKNOWN"
-        # Append label to list for later use
-        label_list.append(label)
 
-        # Get the score
         score = result[0]["score"]
 
-        verse_id = row["verse_id"]
+        row["label"] = label
+        row["score"] = float(score)
+        label_list.append(label)
 
-        # 4. Update original dataframe using BOTH keys
-        df.loc[
-            (df["song_id"] == str(song_id)) &
-            (df["verse_id"] == verse_id),
-            ["label", "score"]
-        ] = [label, score]
-
-    # 5. Save once at the end (important)
-    df.to_csv(CSV_FILE, index=False)
-
-    # Get overall label for the song
-    if "UNSAFE" in label_list:
-        ovr_label = "UNSAFE"
-    else:
-        ovr_label = "SAFE"
-
+    ovr_label = "UNSAFE" if "UNSAFE" in label_list else "SAFE"
     print("Update complete")
-    return ovr_label
-
-# LLM prompt for explicit songs
-def create_prompt_explicit(lyrics):
-    prompt = f"""
-    You are a helpful assistant that explains why a song is classified as explicit based on its lyrics. 
-    The song lyrics are delimited by triple quotes below. 
-    Please provide a concise explanation of which specific words, phrases, or themes in the lyrics contribute to the explicit classification. 
-    Focus on identifying content that may be considered inappropriate for younger audiences, such as profanity, sexual content, violence, or drug references.
-
-    Lyrics:
-    \"\"\"
-    {lyrics}
-    \"\"\"
-
-    Explanation:
-    """
-    return prompt
-
-# LLM prompt for non-explicit songs
-def create_prompt_nonexplicit(lyrics):
-    prompt = f"""
-    You are a helpful assistant that explains why a song is classified as non-explicit based on its lyrics. 
-    The song lyrics are delimited by triple quotes below. 
-    Please provide a concise explanation of why the lyrics do not contain content that would be considered explicit. 
-    Focus on identifying the absence of profanity, sexual content, violence, or drug references, and highlight any themes or language that contribute to the song being suitable for younger audiences.
-
-    Lyrics:
-    \"\"\"
-    {lyrics}
-    \"\"\"
-
-    Explanation:
-    """
-    return prompt
-
-# Get overall explanation from LLM
-def get_llm_explanation(song_id, CSV_FILE):
-
-    # Get song lyrics from csv file using song_id
-    df = pd.read_csv(CSV_FILE, dtype={"song_id": str}, keep_default_na=False)
-    song_row = df[df["song_id"] == str(song_id)].iloc[0]
-    llm_info = song_row.get("llm_info", "")
-
-    # Check if lyrics exist
-    if pd.isna(llm_info) or llm_info.strip() == "":
-        if CSV_FILE == "songinfo.csv":
-            lyrics = song_row.get("lyrics", "")
-            prompt = create_prompt_explicit(lyrics)
-            response = ollama.chat(
-                model="llama3",   # change if needed
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
-
-            llm_info = response["message"]["content"].strip()
-        else:
-            prompt = create_prompt_nonexplicit(lyrics)
-        
-        # Save explanation to csv
-        # update_song_info(song_id, llm_info, CSV_FILE)
-
-        # Return explanation and save to csv
-        return llm_info
-        
-    else:
-        # Return existing explanation from csv
-        return llm_info
+    return verse_records, ovr_label

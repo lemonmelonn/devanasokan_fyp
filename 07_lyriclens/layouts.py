@@ -5,6 +5,7 @@ import dash_mantine_components as dmc
 
 import homeinfo
 import modelinfo
+from data import INITIAL_DASHBOARD_DATA
 
 # Layout for the dashboard
 def dashboard_menu():
@@ -34,27 +35,6 @@ def song_card(track=None, error=None):
         alt="Album cover",
         className="dashboard-cover"
     )
-
-    # if error:
-    #     return dbc.Card(
-    #         dbc.CardBody(
-    #             html.Div(
-    #                 [
-    #                     false_cover,
-    #                     html.Div(
-    #                         [
-    #                             html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#20af28"}),
-    #                             html.H4("No track to analyze", className="section-header mb-2"),
-    #                             html.P("Please select a track to analyze.", className="section-body mb-1")
-    #                         ],
-    #                         className="flex-grow-1"
-    #                     ),
-    #                 ],
-    #                 className="d-flex align-items-center gap-3 flex-wrap"
-    #             )
-    #         ),
-    #         className="dashboard-card shadow-sm border-0"
-    #     )
 
     if not track or error:
         return dbc.Card(
@@ -326,7 +306,8 @@ def song_classification_page():
         
         dcc.Store(id="search-results-store"),
         dcc.Store(id="selected-song"),
-        dcc.Store(id="llm-explanation-store"),
+        dcc.Store(id="song-label-store"),
+        dcc.Store(id="dashboard-data-store", data=INITIAL_DASHBOARD_DATA),
 
         dbc.Modal(
             [
