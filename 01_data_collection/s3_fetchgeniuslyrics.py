@@ -13,8 +13,10 @@ load_dotenv()
 df = pd.read_csv("./storage/englishsongs.csv", encoding='utf-8-sig')
 print("\nInitial shape:", df.shape, "\n")
 
-# Initialize Genius API client
+# Get Genius API developer access token
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+
+# Initialize Genius API client
 genius = lyricsgenius.Genius(
     ACCESS_TOKEN,
     timeout=15, 
@@ -24,17 +26,20 @@ genius = lyricsgenius.Genius(
 # Function to fetch lyrics for a given track and artist
 def get_structured_lyrics(row):
     try:
-        # Search using both track name and artist name to avoid getting the wrong song or a cover version.
+        # Search using both track name and artist name to avoid getting the wrong song or a cover version
         song = genius.search_song(row['clean_track_name'], row['primary_artist'])
-        
+
+        # Return lyrics if song exists
         if song:
             return song.lyrics
         else:
             return None
+        
     except Exception as e:
         print(f"Error fetching {row['clean_track_name']}: {e}")
         return None
-    
+
+# Get song lyrics
 df['genius_lyrics'] = df.progress_apply(get_structured_lyrics, axis=1)
 
 # Insert a new column 'song_id' at the first position

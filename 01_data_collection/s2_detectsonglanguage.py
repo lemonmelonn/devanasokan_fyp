@@ -28,6 +28,7 @@ def detect_language(text):
     except:
         return "unknown", 0.0
 
+# Detect language of lyrics
 df[['language', 'confidence']] = df['lyrics'].progress_apply(
     lambda x: pd.Series(detect_language(x))
 )
