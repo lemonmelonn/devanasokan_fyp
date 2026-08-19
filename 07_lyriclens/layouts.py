@@ -3,7 +3,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 
-import homeinfo
+import projectinfo
 import modelinfo
 from data import INITIAL_DASHBOARD_DATA
 
@@ -363,7 +363,7 @@ def model_page():
 def home_page():
     return html.Div([
         html.H1("Project Overview", className="page-title mb-4"),
-        html.Div(id="page-content", children=homeinfo.layout),
+        html.Div(id="page-content", children=projectinfo.layout),
     ], className="dashboard-page")
 
 # App Layout

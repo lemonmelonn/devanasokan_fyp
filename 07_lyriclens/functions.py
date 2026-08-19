@@ -1,13 +1,14 @@
 from ast import With
 import re
 import os
+import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 import lyricsgenius
 import contractions
 import pandas as pd
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
-import ollama
+from transformers import AutoTokenizer, pipeline
+import onnxruntime as ort
 
 from spotify_functions import get_song_details
 
@@ -22,14 +23,81 @@ genius = lyricsgenius.Genius(
     retries=3
 )
 
+class ONNXTextClassifier:
+    """
+    A custom wrapper class designed to mimic the Hugging Face pipeline 
+    behavior using lightweight ONNX Runtime for low-memory deployment (Render).
+    """
+    def __init__(self, model_dir="./onnx_model"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
+        # Initialize ONNX inference session (runs strictly on CPU, using < 70MB RAM)
+        self.session = ort.InferenceSession(os.path.join(model_dir, "model.onnx"))
+        self.id2label = {0: "SAFE", 1: "UNSAFE"}
+
+    def _softmax(self, x):
+        exp_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+        return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
+
+    def __call__(self, text):
+        """
+        Mimics the pipeline call structure: classifier("some text") 
+        Returns: [{'label': 'SAFE'/'UNSAFE', 'score': 0.99}]
+        """
+        if not text or not str(text).strip():
+            return [{"label": "SAFE", "score": 1.0}]
+
+        try:
+            # Tokenize text into numpy inputs
+            encoded = self.tokenizer(
+                str(text),
+                return_tensors="np",
+                truncation=True,
+                max_length=512,
+                padding=True
+            )
+
+            ort_inputs = {
+                "input_ids": encoded["input_ids"].astype(np.int64),
+                "attention_mask": encoded["attention_mask"].astype(np.int64),
+            }
+
+            # Run inference through ONNX session
+            logits = self.session.run(["logits"], ort_inputs)[0]
+            probabilities = self._softmax(logits)[0]
+
+            pred_idx = int(np.argmax(probabilities))
+            label = self.id2label.get(pred_idx, "SAFE")
+            score = float(probabilities[pred_idx])
+
+            # Match standard Hugging Face pipeline return format (list of dicts)
+            return [{"label": label, "score": score}]
+        
+        except Exception as e:
+            print(f"ONNX Classification error: {e}")
+            return [{"label": "SAFE", "score": 0.5}]
+
+
+# Load the model matching your original initialization structure
+def load_onnx_model():
+    try:
+        # Tries to load the local lightweight ONNX folder
+        classifier = ONNXTextClassifier(model_dir="./onnx_model")
+        print("Lightweight ONNX model loaded successfully.")
+        return classifier
+    except Exception as e:
+        print(f"Failed to load local ONNX model: {e}")
+        return None
+
 # Load the model from Hugging Face Hub using the pipeline API
 def load_model_from_hf():
     classifier = pipeline(
         "text-classification",
         model="devanasokan/bert-lyrics-classifier",
+        framework="pt"
     )
     print("Trained BERT model loaded from Hugging Face Hub.")
     return classifier
+
 
 # Function to detect if a song is explicit based on Spotify metadata
 def detect_explicit(songdetails):
@@ -244,13 +312,16 @@ def get_model_output(classifier, verse_records):
 
         result = classifier(verse)
 
+        print(result)
+
         label = result[0]["label"]
-        if label == "LABEL_0":
-            label = "SAFE"
-        elif label == "LABEL_1":
-            label = "UNSAFE"
-        else:
-            label = "UNKNOWN"
+        print(label)
+        # if label == "LABEL_0":
+        #     label = "SAFE"
+        # elif label == "LABEL_1":
+        #     label = "UNSAFE"
+        # else:
+        #     label = "UNKNOWN"
 
         score = result[0]["score"]
 
@@ -258,6 +329,7 @@ def get_model_output(classifier, verse_records):
         row["score"] = float(score)
         label_list.append(label)
 
+    print(f"Labels assigned: {label_list}")
     ovr_label = "UNSAFE" if "UNSAFE" in label_list else "SAFE"
     print("Update complete")
     return verse_records, ovr_label
