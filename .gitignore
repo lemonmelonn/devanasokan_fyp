@@ -215,6 +215,7 @@ preparation/
 storage/
 huggingface_cache/
 my_bert_models/
+onnx_model/
 
 # Model Training Artifacts
 05_model_training/my_final_bert/
