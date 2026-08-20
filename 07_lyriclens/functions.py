@@ -1,3 +1,4 @@
+# functions.py
 from ast import With
 import re
 import os
@@ -6,7 +7,6 @@ import pandas as pd
 from dotenv import load_dotenv
 import lyricsgenius
 import contractions
-import pandas as pd
 from transformers import AutoTokenizer, pipeline
 import onnxruntime as ort
 
@@ -23,70 +23,6 @@ genius = lyricsgenius.Genius(
     retries=3
 )
 
-class ONNXTextClassifier:
-    """
-    A custom wrapper class designed to mimic the Hugging Face pipeline 
-    behavior using lightweight ONNX Runtime for low-memory deployment (Render).
-    """
-    def __init__(self, model_dir="./onnx_model"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-        # Initialize ONNX inference session (runs strictly on CPU, using < 70MB RAM)
-        self.session = ort.InferenceSession(os.path.join(model_dir, "model.onnx"))
-        self.id2label = {0: "SAFE", 1: "UNSAFE"}
-
-    def _softmax(self, x):
-        exp_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
-        return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
-
-    def __call__(self, text):
-        """
-        Mimics the pipeline call structure: classifier("some text") 
-        Returns: [{'label': 'SAFE'/'UNSAFE', 'score': 0.99}]
-        """
-        if not text or not str(text).strip():
-            return [{"label": "SAFE", "score": 1.0}]
-
-        try:
-            # Tokenize text into numpy inputs
-            encoded = self.tokenizer(
-                str(text),
-                return_tensors="np",
-                truncation=True,
-                max_length=512,
-                padding=True
-            )
-
-            ort_inputs = {
-                "input_ids": encoded["input_ids"].astype(np.int64),
-                "attention_mask": encoded["attention_mask"].astype(np.int64),
-            }
-
-            # Run inference through ONNX session
-            logits = self.session.run(["logits"], ort_inputs)[0]
-            probabilities = self._softmax(logits)[0]
-
-            pred_idx = int(np.argmax(probabilities))
-            label = self.id2label.get(pred_idx, "SAFE")
-            score = float(probabilities[pred_idx])
-
-            # Match standard Hugging Face pipeline return format (list of dicts)
-            return [{"label": label, "score": score}]
-        
-        except Exception as e:
-            print(f"ONNX Classification error: {e}")
-            return [{"label": "SAFE", "score": 0.5}]
-
-
-# Load the model matching your original initialization structure
-def load_onnx_model():
-    try:
-        # Tries to load the local lightweight ONNX folder
-        classifier = ONNXTextClassifier(model_dir="./onnx_model")
-        print("Lightweight ONNX model loaded successfully.")
-        return classifier
-    except Exception as e:
-        print(f"Failed to load local ONNX model: {e}")
-        return None
 
 # Load the model from Hugging Face Hub using the pipeline API
 def load_model_from_hf():
@@ -112,10 +48,11 @@ def detect_explicit(songdetails):
         print(f"Explicit: {explicit}")
         return False
 
+
 # Function to fetch lyrics for a given track and artist
 def get_structured_lyrics(artist, track):
     try:
-        # Search using both track name and artist name to avoid getting the wrong song or a cover version.
+        # Search for the song using the Genius API
         song = genius.search_song(track, artist)
 
         if song:
@@ -300,9 +237,11 @@ def clean_verses(verse_records):
     return verse_records
 
 
+# Get model output for each verse and assign labels
 def get_model_output(classifier, verse_records):
     label_list = []
 
+    # Loop through each verse and get model output
     for row in verse_records:
         verse = (row.get("clean_verse") or "").strip()
         if not verse:
@@ -310,19 +249,20 @@ def get_model_output(classifier, verse_records):
             row["score"] = ""
             continue
 
+        # Get prediction from the model
         result = classifier(verse)
 
-        print(result)
-
         label = result[0]["label"]
-        print(label)
-        # if label == "LABEL_0":
-        #     label = "SAFE"
-        # elif label == "LABEL_1":
-        #     label = "UNSAFE"
-        # else:
-        #     label = "UNKNOWN"
 
+        # Map model labels to human-readable labels
+        if label == "LABEL_0":
+            label = "SAFE"
+        elif label == "LABEL_1":
+            label = "UNSAFE"
+        else:
+            label = "UNKNOWN"
+
+        # Get the confidence score from the model output
         score = result[0]["score"]
 
         row["label"] = label
@@ -330,6 +270,7 @@ def get_model_output(classifier, verse_records):
         label_list.append(label)
 
     print(f"Labels assigned: {label_list}")
+
+    # Determine overall song label based on individual verse labels
     ovr_label = "UNSAFE" if "UNSAFE" in label_list else "SAFE"
-    print("Update complete")
     return verse_records, ovr_label

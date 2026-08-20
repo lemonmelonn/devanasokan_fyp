@@ -1,5 +1,6 @@
-import logging
+# app.py
 
+import logging
 from dash import Dash
 import dash_bootstrap_components as dbc
 
@@ -9,6 +10,7 @@ from callbacks import register_callbacks
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize the Dash app with external stylesheets and suppress callback exceptions
 app = Dash(
     __name__,
     suppress_callback_exceptions=True,
@@ -21,10 +23,13 @@ app = Dash(
     ],
 )
 
+# Set the server variable for deployment
 server = app.server
 app.layout = create_app_layout()
 
+# Register callbacks for the app
 register_callbacks(app)
 
+# Run the app
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)

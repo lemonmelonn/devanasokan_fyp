@@ -1,3 +1,5 @@
+# spotify_functions.py
+
 import requests
 from dotenv import load_dotenv
 import os
@@ -90,7 +92,7 @@ def get_song_details(song_title, artist_name, access_token):
         "explicit": track["explicit"]
     }
 
-
+# Function to get the currently playing song for the authenticated user
 def get_currently_playing():
     current = sp.current_user_playing_track()
 
@@ -107,12 +109,6 @@ def get_currently_playing():
     else:
         return None
 
-# currently_playing = get_currently_playing()
-# print(currently_playing)
-
-# artist = sp.artist(currently_playing["id"])
-# print(artist["genres"])
-
 
 # Returns a Spotify access token using Client Credentials Flow
 def get_access_token():
@@ -126,52 +122,7 @@ def get_access_token():
     return response.json()["access_token"]
 
 
-# Searches for an album by name and returns the first match
-def find_album(album_name):
-    token = get_access_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    params = {
-        "q": album_name,
-        "type": "album",
-        "limit": 1
-    }
-
-    response = requests.get(
-        "https://api.spotify.com/v1/search",
-        headers=headers,
-        params=params
-    )
-
-    response.raise_for_status()
-
-    albums = response.json()["albums"]["items"]
-
-    if not albums:
-        return None
-
-    return albums[0]
-
-
-# Returns the tracks of a given album
-def get_album_tracks(album_id, token):
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.get(
-        f"https://api.spotify.com/v1/albums/{album_id}/tracks",
-        headers=headers
-    )
-
-    response.raise_for_status()
-
-    return response.json()["items"]
-
-
+# Function to search for possible songs based on a query
 def search_possible_songs(query, limit=5):
     """
     Search songs using Spotify API

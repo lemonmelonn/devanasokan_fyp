@@ -1,3 +1,5 @@
+# modelinfo.py
+
 from dash import html
 import dash_bootstrap_components as dbc
 
@@ -121,6 +123,7 @@ def data_prep_card():
                         "Contextual Labeling: Ground-truth labels annotated via local LLaMA 3 zero-shot semantic safety prompts.",
                         "Class Balancing: Undersampled majority Safe class to establish an exact 50:50 balanced distribution.",
                         "Stratified Splitting: Evaluated 70:15:15 and 80:10:10 train/val/test splits with fixed seed (SEED = 42) for reproducibility.",
+                        "Final Split: 80% Train, 10% Validation, 10% Test.",
                     ]
                 ),
             ]
@@ -163,10 +166,10 @@ def _kpi_card(title, value, accent):
 def performance_card():
     metric_row = dbc.Row(
         [
-            dbc.Col(_kpi_card("Accuracy", "88.96%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("Precision", "89.21%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("Recall", "88.64%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("F1-Score", "88.92%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Accuracy", "89.25%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Precision", "89.18%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Recall", "89.34%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("F1-Score", "89.26%", "#0ea5e9"), xs=12, sm=6, xl=3),
         ],
         className="g-4",
     )

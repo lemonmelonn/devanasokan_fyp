@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 from urllib.parse import urlparse
 
 from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model_page, home_page
-from functions import load_model_from_hf, load_onnx_model, get_structured_lyrics, split_verses, clean_verses, get_model_output
+from functions import load_model_from_hf, get_structured_lyrics, split_verses, clean_verses, get_model_output
 from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
 from data import init_dashboard_data
 
@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 # print(ALL)
 
 # Load the classifier model and get the Spotify access token
-# CLASSIFIER = load_model_from_hf()
-CLASSIFIER = load_onnx_model()
+CLASSIFIER = load_model_from_hf()
 TOKEN = get_access_token()
 
 def register_callbacks(app):

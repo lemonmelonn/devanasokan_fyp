@@ -25,7 +25,7 @@ def dashboard_menu():
 # Song Card Layout (Handles both currently listening and manual search results)
 def song_card(track=None, error=None):
 
-    method = track.get("method") if track else "Currently Listening"
+    method = track.get("method") if track else "Manual Search"
     # print("Album cover:", track.get("album_image") if track else "No track data")
 
     # Use placeholder image if no track is available
@@ -255,7 +255,7 @@ def verse_label_table(verse_info=None, error=None):
     # Return the card with the verse table
     return dbc.Card(
         dbc.CardBody([
-            html.H4("Song Verses", className="section-header mb-3"),
+            html.H4("Song Verses", className="section-header mb-3", style={"color": "#0ea5e9"}),
             table,
         ]),
         className="dashboard-card shadow-sm border-0"
