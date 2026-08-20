@@ -1,7 +1,3 @@
-import os
-os.environ["USE_TF"] = "0"
-os.environ["USE_TORCH"] = "1"
-
 import logging
 
 from dash import Dash
