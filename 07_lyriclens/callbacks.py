@@ -2,7 +2,7 @@
 import logging
 import re
 import pandas as pd
-from dash import Input, Output, State, callback, ALL, ctx, html, no_update
+from dash import Input, Output, State, callback, ALL, ctx, dash, html, no_update
 from dash.exceptions import PreventUpdate
 from urllib.parse import urlparse
 
@@ -335,3 +335,15 @@ def register_callbacks(app):
             return song_label_card(label=song_label), verse_label_table(verse_info=verse_info), song_label
 
         return song_label_card(label=None), verse_label_table(verse_info=None), None
+
+
+    # Add this callback to handle logout
+    @callback(
+        Output("url", "pathname"),
+        Input("logout-button", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def logout(n_clicks):
+        if n_clicks:
+            return "/logout"
+        return dash.no_update

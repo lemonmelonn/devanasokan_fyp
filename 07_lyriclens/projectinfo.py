@@ -64,7 +64,7 @@ layout = dbc.Container(
                                     style={
                                         "fontSize": "0.95rem",
                                         "fontWeight": 600,
-                                        "color": "#10b981",
+                                        "color": "#0ea5e9",
                                         "marginBottom": "1rem",
                                         "letterSpacing": "0.04em",
                                         "textTransform": "uppercase",

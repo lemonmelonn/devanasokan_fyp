@@ -14,11 +14,13 @@ def dashboard_menu():
         color="primary",
         dark=True,
         fluid=True,
+        sticky="top",
         className="dashboard-navbar",
         children=[
             dbc.NavItem(dbc.NavLink("Project Overview", href="/home")),
             dbc.NavItem(dbc.NavLink("Song Classification", href="/classification")),
             dbc.NavItem(dbc.NavLink("Model Info", href="/model")),
+            dbc.NavItem(dbc.Button("🚪", id="logout-button", className="ms-auto", size="lg", style={"border": "none", "padding": "0.5rem"}))
         ],
     )
 
