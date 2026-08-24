@@ -1,6 +1,7 @@
 # callbacks.py
 import logging
 import re
+from flask import redirect, session
 import pandas as pd
 from dash import Input, Output, State, callback, ALL, ctx, html, no_update
 from dash.exceptions import PreventUpdate
@@ -29,6 +30,9 @@ def register_callbacks(app):
         parsed = urlparse(href)
         pathname = parsed.path
 
+        if pathname in ["/login", "/callback"]:
+            raise PreventUpdate
+
         if pathname == "/":
             print("Redirecting to /home")
             return home_page()
@@ -42,6 +46,7 @@ def register_callbacks(app):
         if pathname == "/model":
             return model_page()
 
+
         return html.Div("404: Page not found", className="dashboard-page")
     
     # Callback to fetch the currently playing song and update the song card
@@ -52,15 +57,50 @@ def register_callbacks(app):
         Input("get-current-song", "n_clicks")
     )
     def get_current_song(pathname, n_clicks):
-        if pathname not in ["/", "/classification"]:
+        triggered = ctx.triggered_id
+        
+        print(f"\n[DEBUG] get_current_song called!")
+        print(f"[DEBUG] triggered: {triggered}")
+        print(f"[DEBUG] pathname: {pathname}")
+        print(f"[DEBUG] n_clicks: {n_clicks}")
+        
+        # Handle all cases where callback fires
+        if triggered is None:
+            # Initial load or state change - only proceed if on /classification
+            print(f"[DEBUG] triggered is None, checking pathname...")
+            if pathname != "/classification":
+                print(f"[DEBUG] Not on /classification ({pathname}), raising PreventUpdate")
+                raise PreventUpdate
+        elif triggered == "url":
+            # URL changed - only fetch if navigating to /classification
+            print(f"[DEBUG] URL triggered, checking if /classification...")
+            if pathname != "/classification":
+                print(f"[DEBUG] URL changed but not to /classification ({pathname}), raising PreventUpdate")
+                raise PreventUpdate
+        elif triggered == "get-current-song":
+            # Button clicked - ensure n_clicks is valid
+            print(f"[DEBUG] Button triggered, checking n_clicks...")
+            if n_clicks is None or n_clicks == 0:
+                print(f"[DEBUG] Button clicked but n_clicks is None/0, raising PreventUpdate")
+                raise PreventUpdate
+        else:
+            # Unknown trigger
+            print(f"[DEBUG] Triggered by unknown: {triggered}, raising PreventUpdate")
             raise PreventUpdate
+ 
+        print(f"[DEBUG] Proceeding to fetch current song...")
 
         try:
-            # Fetch the currently playing track from Spotify
-            current_track = get_currently_playing()
+            token = session.get('spotify_token')
+
+            if not token:
+                return song_card(error="Not logged in. Please log in first."), no_update
+        
+            # Fetch the currently playing track from Spotify - PASS THE TOKEN
+            current_track = get_currently_playing(token)
 
             if not current_track:
-                return song_card(error="No currently playing track found"), no_update
+                return song_card(error="No currently playing track found"), None
 
             # Add method to track details
             current_track["method"] = "Currently Listening"
@@ -78,7 +118,7 @@ def register_callbacks(app):
 
         except Exception as exc:
             logger.exception("Failed to fetch currently playing track")
-            return song_card(error=exc), no_update
+            return song_card(error=str(exc)), no_update
 
         selected_song = {
             "song_id": current_track.get("song_id"),
@@ -166,7 +206,7 @@ def register_callbacks(app):
 
         except Exception as exc:
             logger.exception("Failed to predict song label")
-            return song_label_card(error=exc), verse_label_table(error=exc), None, no_update
+            return song_label_card(error=str(exc)), verse_label_table(error=str(exc)), None, no_update
 
         return song_label_card(label=ovr_label), verse_label_table(verse_info=verse_info), ovr_label, dashboard_data
     
@@ -316,7 +356,7 @@ def register_callbacks(app):
     )
     def clear_labels_on_song_change(selected_song, dashboard_data):
         if not selected_song or not selected_song.get("song_id"):
-            raise PreventUpdate
+            return song_label_card(label=None), verse_label_table(verse_info=None), None
 
         dashboard_data = init_dashboard_data(dashboard_data)
         song_id = str(selected_song.get("song_id"))
@@ -335,3 +375,21 @@ def register_callbacks(app):
             return song_label_card(label=song_label), verse_label_table(verse_info=verse_info), song_label
 
         return song_label_card(label=None), verse_label_table(verse_info=None), None
+
+
+    # Handle Spotify authentication button click
+    @app.callback(
+        Output("url", "pathname"),
+        Input("spotify-auth-btn", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def handle_spotify_auth(n_clicks):
+        from flask import session
+        
+        # Check if user is logged in
+        if session.get("spotify_token"):
+            # User is logged in → logout
+            return "/logout"
+        else:
+            # User is not logged in → login
+            return "/login"

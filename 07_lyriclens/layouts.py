@@ -20,14 +20,26 @@ def dashboard_menu():
             dbc.NavItem(dbc.NavLink("Project Overview", href="/home")),
             dbc.NavItem(dbc.NavLink("Song Classification", href="/classification")),
             dbc.NavItem(dbc.NavLink("Model Info", href="/model")),
+            dbc.NavItem(
+                dbc.Button(
+                    html.Img(
+                        src="/assets/spotify.png",
+                        height="42px",
+                        alt="Spotify"
+                    ),
+                    id="spotify-auth-btn",
+                    color="link",
+                    className="ms-auto",
+                    style={"border": "none", "padding": "0"}
+                )
+            ),
         ],
     )
 
 # Song Card Layout (Handles both currently listening and manual search results)
 def song_card(track=None, error=None):
 
-    method = track.get("method") if track else "Manual Search"
-    # print("Album cover:", track.get("album_image") if track else "No track data")
+    method = track.get("method") if track else "Currently Listening"
 
     # Use placeholder image if no track is available
     cover_src = "/assets/monke.jpg"
@@ -47,7 +59,7 @@ def song_card(track=None, error=None):
                             [
                                 html.H5(method, className="section-header mb-2", style={"marginBottom": "20px", "color": "#0ea5e9"}),
                                 html.H4("No Track Available", className="section-header mb-2"),
-                                html.P("Please select a track to analyze.", className="section-body mb-1")
+                                html.P("Either no track is currently playing or your account is not connected", className="section-body mb-1")
                             ],
                             className="flex-grow-1"
                         ),
@@ -114,12 +126,18 @@ def song_card(track=None, error=None):
 
 # Card for displaying the song label
 def song_label_card(label=None, error=None):
-    if error:
+
+    # Create a badge for the error state
+    error_badge = dbc.Badge("No Label", color="#6c757d", className="ms-2", 
+                            style={"fontSize": "18px", "font-weight": "bold"})
+
+    if not label or error:
         return dbc.Card(
             dbc.CardBody([
                 html.H4("Song Label", className="section-header mb-2", style={"color": "#0ea5e9"}),
-                html.P("Unable to determine the song label right now.", className="section-body mb-1"),
-                html.Small(str(error), className="section-meta"),
+                html.Br(),
+                error_badge,
+                html.Br(),
                 html.Br(),
                 html.P(
                     "SAFE: Suitable for children\nUNSAFE: Not suitable for children",
@@ -129,25 +147,6 @@ def song_label_card(label=None, error=None):
                         "color": "#4F5860",
                         "whiteSpace": "pre-line",
                     },
-                ),
-            ]),
-            className="dashboard-card shadow-sm border-0"
-        )
-
-    if not label:
-        return dbc.Card(
-            dbc.CardBody([
-                html.H4("Song Label", className="section-header mb-2", style={"color": "#0ea5e9"}),
-                html.P("No label has been determined for the current song.", className="section-body mb-0"),
-                html.Br(),
-                html.P(
-                    "SAFE: Suitable for children\nUNSAFE: Not suitable for children",
-                        style={
-                            "marginTop": "15px",
-                            "fontSize": "12px",
-                            "color": "#4F5860",
-                            "whiteSpace": "pre-line",
-                        },
                 ),
             ]),
             className="dashboard-card shadow-sm border-0"
@@ -372,7 +371,7 @@ def create_app_layout():
     return dmc.MantineProvider(
         theme={"colorScheme": "dark"},
         children=[
-            dcc.Location(id="url", refresh=False),
+            dcc.Location(id="url", refresh=True),
             dashboard_menu(),
             html.Div(id="page-container", className="dashboard-container")
         ]

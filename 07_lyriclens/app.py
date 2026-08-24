@@ -3,14 +3,14 @@
 import logging
 from dash import Dash
 import dash_bootstrap_components as dbc
-
-from layouts import create_app_layout
+from flask import request, redirect, session
+from spotify_functions import exchange_code_for_token, get_auth_url
 from callbacks import register_callbacks
+from layouts import create_app_layout
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize the Dash app with external stylesheets and suppress callback exceptions
 app = Dash(
     __name__,
     suppress_callback_exceptions=True,
@@ -23,13 +23,33 @@ app = Dash(
     ],
 )
 
-# Set the server variable for deployment
 server = app.server
+server.secret_key = "your-secret-key-change-this"  # Add a secret key for sessions
 app.layout = create_app_layout()
 
-# Register callbacks for the app
+# Login endpoint
+@server.route("/login")
+def login():
+    return redirect(get_auth_url())
+
+# Logout endpoint
+@server.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+# OAuth callback
+@server.route("/callback")
+def callback():
+    code = request.args.get('code')
+    if code:
+        token = exchange_code_for_token(code)
+        if token:
+            session['spotify_token'] = token
+            return redirect("/classification")
+    return redirect("/")
+
 register_callbacks(app)
 
-# Run the app
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)

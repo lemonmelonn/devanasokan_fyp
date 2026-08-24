@@ -10,7 +10,7 @@ import contractions
 from transformers import AutoTokenizer, pipeline
 import onnxruntime as ort
 
-from spotify_functions import get_song_details
+# from spotify_functions import get_song_details
 
 # Load environment variables from .env
 load_dotenv()

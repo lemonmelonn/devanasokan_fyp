@@ -4,96 +4,43 @@ import requests
 from dotenv import load_dotenv
 import os
 from spotipy import Spotify
-from spotipy.oauth2 import SpotifyOAuth
 
 # Load environment variables from .env
 load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+REDIRECT_URI = "http://127.0.0.1:5000/callback"
 
-# Initialize Spotify client with user-read-currently-playing scope
-sp = Spotify(auth_manager=SpotifyOAuth(
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET,
-    redirect_uri="http://127.0.0.1:5000/callback",
-    scope="user-read-currently-playing"
-))
+def get_spotify_client(access_token):
+    """Create a Spotify client with an access token"""
+    return Spotify(auth=access_token)
 
-# Function to get details of given song
-def get_song_details(song_title, artist_name, access_token):
-    """
-    Search Spotify for a song using title and artist.
+def get_auth_url():
+    """Generate Spotify OAuth authorization URL"""
+    scopes = "user-read-currently-playing"
+    auth_url = f"https://accounts.spotify.com/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope={scopes}&show_dialog=true"
+    return auth_url
 
-    Returns:
-        dict containing song details, or None if not found.
-    """
-
-    url = "https://api.spotify.com/v1/search"
-
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
-
-    queries = []
-    if song_title and artist_name:
-        queries.append(f'track:"{song_title}" artist:"{artist_name}"')
-    if song_title:
-        queries.append(f'track:"{song_title}"')
-    if song_title and artist_name:
-        queries.append(f"{song_title} {artist_name}")
-
-    track = None
-
-    for query in queries:
-        params = {
-            "q": query,
-            "type": "track",
-            "limit": 10
+def exchange_code_for_token(code):
+    """Exchange authorization code for access token"""
+    response = requests.post(
+        "https://accounts.spotify.com/api/token",
+        data={
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": REDIRECT_URI,
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
         }
+    )
+    if response.status_code == 200:
+        return response.json()["access_token"]
+    return None
 
-        response = requests.get(url, headers=headers, params=params)
-
-        if response.status_code != 200:
-            print("Error:", response.status_code, response.text)
-            return None
-
-        data = response.json()
-        tracks = data.get("tracks", {}).get("items", [])
-
-        if not tracks:
-            continue
-
-        if artist_name:
-            normalized_artist = artist_name.strip().lower()
-
-            for candidate in tracks:
-                candidate_artists = [artist["name"].strip().lower() for artist in candidate.get("artists", [])]
-
-                if any(normalized_artist in artist_name_value for artist_name_value in candidate_artists):
-                    track = candidate
-                    break
-
-        if track is None:
-            track = tracks[0]
-
-        if track is not None:
-            break
-
-    if track is None:
-        print("Song not found")
-        return None
-
-    return {
-        "song_id": track["id"],
-        "title": track["name"],
-        "artist": ", ".join([artist["name"] for artist in track["artists"]]),
-        "album": track["album"]["name"],
-        "explicit": track["explicit"]
-    }
-
-# Function to get the currently playing song for the authenticated user
-def get_currently_playing():
+def get_currently_playing(access_token):
+    """Get currently playing track"""
+    sp = get_spotify_client(access_token)
     current = sp.current_user_playing_track()
 
     if current and current["is_playing"]:
@@ -109,37 +56,21 @@ def get_currently_playing():
     else:
         return None
 
-
-# Returns a Spotify access token using Client Credentials Flow
-def get_access_token():
+def search_possible_songs(query, limit=5):
+    """Search songs - uses Client Credentials (doesn't need user token)"""
     response = requests.post(
         "https://accounts.spotify.com/api/token",
         data={"grant_type": "client_credentials"},
         auth=(CLIENT_ID, CLIENT_SECRET)
     )
-
-    response.raise_for_status()
-    return response.json()["access_token"]
-
-
-# Function to search for possible songs based on a query
-def search_possible_songs(query, limit=5):
-    """
-    Search songs using Spotify API
-    Returns list formatted for Dash dropdown
-    """
-
-    if not query:
-        return []
-
+    token = response.json()["access_token"]
+    sp = get_spotify_client(token)
+    
     results = sp.search(q=query, type="track", limit=limit)
-
     items = results["tracks"]["items"]
 
     formatted = []
-
     for item in items:
-
         formatted.append({
             "song_id": item["id"],
             "title": item["name"],
@@ -150,3 +81,13 @@ def search_possible_songs(query, limit=5):
         })
 
     return formatted
+
+def get_access_token():
+    """Get Client Credentials token for general searches"""
+    response = requests.post(
+        "https://accounts.spotify.com/api/token",
+        data={"grant_type": "client_credentials"},
+        auth=(CLIENT_ID, CLIENT_SECRET)
+    )
+    response.raise_for_status()
+    return response.json()["access_token"]
