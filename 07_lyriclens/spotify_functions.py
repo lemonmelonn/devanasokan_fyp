@@ -91,3 +91,9 @@ def get_access_token():
     )
     response.raise_for_status()
     return response.json()["access_token"]
+
+def get_current_user(access_token):
+    """Get current user's display name"""
+    sp = get_spotify_client(access_token)
+    user = sp.current_user()
+    return user.get("display_name") or user.get("id")

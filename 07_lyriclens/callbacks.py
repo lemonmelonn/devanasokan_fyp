@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 from layouts import song_card, song_classification_page, song_label_card, verse_label_table, model_page, home_page
 from functions import load_model_from_hf, get_structured_lyrics, split_verses, clean_verses, get_model_output
-from spotify_functions import get_access_token, get_currently_playing, search_possible_songs
+from spotify_functions import get_access_token, get_currently_playing, search_possible_songs, get_current_user
 from data import init_dashboard_data
 
 logger = logging.getLogger(__name__)
@@ -393,3 +393,19 @@ def register_callbacks(app):
         else:
             # User is not logged in → login
             return "/login"
+
+
+    # Callback to update Spotify username tooltip based on login status
+    @app.callback(
+        Output("spotify-tooltip", "children"),
+        Input("url", "pathname"),
+    )
+    def update_spotify_username(pathname):
+        token = session.get("spotify_token")
+        if token:
+            try:
+                username = get_current_user(token)
+                return f"Logged in as: {username}"
+            except:
+                return "Logout"
+        return "Login to Spotify"

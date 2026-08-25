@@ -21,17 +21,26 @@ def dashboard_menu():
             dbc.NavItem(dbc.NavLink("Song Classification", href="/classification")),
             dbc.NavItem(dbc.NavLink("Model Info", href="/model")),
             dbc.NavItem(
-                dbc.Button(
-                    html.Img(
-                        src="/assets/spotify.png",
-                        height="42px",
-                        alt="Spotify"
+                html.Div([
+                    dcc.Store(id="spotify-username-store"),
+                    dbc.Button(
+                        html.Img(
+                            src="/assets/spotify.png",
+                            height="42px",
+                            alt="Spotify"
+                        ),
+                        id="spotify-auth-btn",
+                        color="link",
+                        className="ms-auto",
+                        style={"border": "none", "padding": "0"}
                     ),
-                    id="spotify-auth-btn",
-                    color="link",
-                    className="ms-auto",
-                    style={"border": "none", "padding": "0"}
-                )
+                    dbc.Tooltip(
+                        id="spotify-tooltip",
+                        children="Login",
+                        target="spotify-auth-btn",
+                        placement="bottom"
+                    )
+                ])
             ),
         ],
     )
