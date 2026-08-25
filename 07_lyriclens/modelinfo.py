@@ -25,6 +25,7 @@ BODY_TEXT_STYLE = {
 }
 
 
+# Helper function to create a list of specifications
 def _spec_list(items):
     return html.Ul(
         [html.Li(item, style={"marginBottom": "0.45rem"}) for item in items],
@@ -32,6 +33,7 @@ def _spec_list(items):
     )
 
 
+# Function to create the model architecture and outline card
 def outline_card():
     summary = html.P(
         "Fine-tuned BERT (bert-base-uncased) sequence classification model trained for verse-level lyrical safety classification.",
@@ -93,6 +95,7 @@ def outline_card():
     )
 
 
+# Data cleaning and normalization card
 def data_prep_card():
     left_col = dbc.Card(
         dbc.CardBody(
@@ -147,6 +150,7 @@ def data_prep_card():
     )
 
 
+# Function to create the performance metrics and evaluation card
 def _kpi_card(title, value, accent):
     return dbc.Card(
         dbc.CardBody(
@@ -163,6 +167,7 @@ def _kpi_card(title, value, accent):
     )
 
 
+# Performance metrics and evaluation card
 def performance_card():
     metric_row = dbc.Row(
         [
@@ -219,6 +224,7 @@ def performance_card():
     return html.Div([metric_row, diagnostics_row])
 
 
+# Production deployment and real-time pipeline card
 def deployment_card():
     return dbc.Card(
         dbc.CardBody(
@@ -282,6 +288,7 @@ def deployment_card():
     )
 
 
+# Overall layout for the model information page
 layout = dbc.Container(
     [
         html.H2("Model Architecture & Outline", className="section-header mb-3"),

@@ -5,7 +5,7 @@ from dash import dcc, html
 import plotly.express as px
 import plotly.graph_objects as go
 
-
+# Create statistics card component
 def stat_card(value, label, accent="#10b981"):
     return dbc.Card(
         dbc.CardBody(
@@ -43,6 +43,7 @@ def stat_card(value, label, accent="#10b981"):
 # Home Info Layout
 layout = dbc.Container(
     [
+        # Header Section
         html.Div(
             [
                 html.Div(

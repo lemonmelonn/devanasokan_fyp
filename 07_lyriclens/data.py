@@ -6,7 +6,6 @@ INITIAL_DASHBOARD_DATA = {
     "verses_by_song_id": {},
 }
 
-
 def init_dashboard_data(data):
 
     # Return a normalized, JSON-serializable dashboard data payload

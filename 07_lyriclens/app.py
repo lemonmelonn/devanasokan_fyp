@@ -11,6 +11,7 @@ from layouts import create_app_layout
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Create the Dash app with external stylesheets and suppress callback exceptions
 app = Dash(
     __name__,
     suppress_callback_exceptions=True,
@@ -23,8 +24,11 @@ app = Dash(
     ],
 )
 
+# Set the server and secret key for session management
 server = app.server
-server.secret_key = "your-secret-key-change-this"  # Add a secret key for sessions
+server.secret_key = "fyp-secret-key"  # Add a secret key for sessions
+
+# Initialize the app layout
 app.layout = create_app_layout()
 
 # Login endpoint
@@ -49,7 +53,9 @@ def callback():
             return redirect("/classification")
     return redirect("/")
 
+# Register callbacks for the Dash app
 register_callbacks(app)
 
+# Run the app
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)

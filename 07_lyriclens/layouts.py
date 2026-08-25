@@ -58,6 +58,7 @@ def song_card(track=None, error=None):
         className="dashboard-cover"
     )
 
+    # Return a card indicating no track is available
     if not track or error:
         return dbc.Card(
             dbc.CardBody([
@@ -140,6 +141,7 @@ def song_label_card(label=None, error=None):
     error_badge = dbc.Badge("No Label", color="#6c757d", className="ms-2", 
                             style={"fontSize": "18px", "font-weight": "bold"})
 
+    # Return a card indicating no label is available
     if not label or error:
         return dbc.Card(
             dbc.CardBody([
@@ -201,6 +203,8 @@ def song_label_card(label=None, error=None):
 
 # Card for displaying the verse label table
 def verse_label_table(verse_info=None, error=None):
+
+    # Return a card indicating no verses are available
     if error:
         return dbc.Card(
             dbc.CardBody([
@@ -211,6 +215,7 @@ def verse_label_table(verse_info=None, error=None):
             className="dashboard-card shadow-sm border-0"
         )
 
+    # Return a card indicating no verses are available
     if verse_info is None or len(verse_info) == 0:
         return dbc.Card(
             dbc.CardBody([
@@ -256,6 +261,7 @@ def verse_label_table(verse_info=None, error=None):
         for _, row in table_data.iterrows()
     ])
 
+    # Create the table with the header and body
     table = html.Div(
         html.Table([header, body], className="dashboard-html-table"),
         className="dashboard-table",
@@ -275,6 +281,7 @@ def song_classification_page():
     return html.Div([
         html.H1("Song Classification", className="page-title mb-4"),
 
+        # Song Info and Song Label Cards
         dbc.Row(
             [
                 dbc.Col(
@@ -297,6 +304,7 @@ def song_classification_page():
             className="mt-4 g-3",
         ),
 
+        # Buttons for manual search, Spotify, and report generation
         html.Div(
             [
                 dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button me-2"),
@@ -318,6 +326,7 @@ def song_classification_page():
         dcc.Store(id="song-label-store"),
         dcc.Store(id="dashboard-data-store", data=INITIAL_DASHBOARD_DATA),
 
+        # Manual Search Modal
         dbc.Modal(
             [
                 dbc.ModalHeader("Manual Search"),
@@ -375,7 +384,7 @@ def home_page():
         html.Div(id="page-content", children=projectinfo.layout),
     ], className="dashboard-page")
 
-# App Layout
+# App Layout (used in app.py)
 def create_app_layout():
     return dmc.MantineProvider(
         theme={"colorScheme": "dark"},

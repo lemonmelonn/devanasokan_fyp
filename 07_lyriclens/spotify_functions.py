@@ -12,18 +12,18 @@ CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://127.0.0.1:5000/callback"
 
+# Create a Spotify client with an access token
 def get_spotify_client(access_token):
-    """Create a Spotify client with an access token"""
     return Spotify(auth=access_token)
 
+# Spotify OAuth functions
 def get_auth_url():
-    """Generate Spotify OAuth authorization URL"""
     scopes = "user-read-currently-playing"
     auth_url = f"https://accounts.spotify.com/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope={scopes}&show_dialog=true"
     return auth_url
 
+# Exchange authorization code for access token
 def exchange_code_for_token(code):
-    """Exchange authorization code for access token"""
     response = requests.post(
         "https://accounts.spotify.com/api/token",
         data={
@@ -38,8 +38,8 @@ def exchange_code_for_token(code):
         return response.json()["access_token"]
     return None
 
+# Get currently playing track
 def get_currently_playing(access_token):
-    """Get currently playing track"""
     sp = get_spotify_client(access_token)
     current = sp.current_user_playing_track()
 
@@ -56,8 +56,8 @@ def get_currently_playing(access_token):
     else:
         return None
 
+# Search for songs using the Spotify API
 def search_possible_songs(query, limit=5):
-    """Search songs - uses Client Credentials (doesn't need user token)"""
     response = requests.post(
         "https://accounts.spotify.com/api/token",
         data={"grant_type": "client_credentials"},
@@ -82,8 +82,8 @@ def search_possible_songs(query, limit=5):
 
     return formatted
 
+# Get Client Credentials token for general searches
 def get_access_token():
-    """Get Client Credentials token for general searches"""
     response = requests.post(
         "https://accounts.spotify.com/api/token",
         data={"grant_type": "client_credentials"},
@@ -92,8 +92,8 @@ def get_access_token():
     response.raise_for_status()
     return response.json()["access_token"]
 
+# Get the current user's display name or ID
 def get_current_user(access_token):
-    """Get current user's display name"""
     sp = get_spotify_client(access_token)
     user = sp.current_user()
     return user.get("display_name") or user.get("id")

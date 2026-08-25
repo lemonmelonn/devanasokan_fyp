@@ -14,14 +14,14 @@ from data import init_dashboard_data
 
 logger = logging.getLogger(__name__)
 
-# print(ALL)
-
-# Load the classifier model and get the Spotify access token
+# Load the classifier model
 CLASSIFIER = load_model_from_hf()
-TOKEN = get_access_token()
 
+
+# Register all callbacks for the Dash app
 def register_callbacks(app):
-    
+
+    # Callback to handle page navigation based on URL
     @app.callback(
         Output("page-container", "children"),
         Input("url", "href")
@@ -48,6 +48,7 @@ def register_callbacks(app):
 
 
         return html.Div("404: Page not found", className="dashboard-page")
+
     
     # Callback to fetch the currently playing song and update the song card
     @app.callback(
@@ -131,6 +132,7 @@ def register_callbacks(app):
         }
 
         return song_card(current_track), selected_song
+
     
     # Callback to predict the song label and update the song label card and verse label table
     @app.callback(
@@ -220,8 +222,9 @@ def register_callbacks(app):
     )
     def toggle_modal(n, is_open):
         return not is_open
-    
 
+    
+    # Close the modal when a song is selected
     @callback(
         Output("manual-search-modal", "is_open", allow_duplicate=True),
         Input("search-song", "n_clicks"),
@@ -260,13 +263,13 @@ def register_callbacks(app):
                     className="song-card",
                     children=[
 
-                        # LEFT: album cover
+                        # Left: Album cover
                         html.Img(
                             src=song["album_cover"],
                             className="song-card-img"
                         ),
 
-                        # RIGHT: details
+                        # Right: Song details
                         html.Div(
                             className="song-card-info",
                             children=[
@@ -404,6 +407,7 @@ def register_callbacks(app):
         token = session.get("spotify_token")
         if token:
             try:
+                # Get the current user's username using the token
                 username = get_current_user(token)
                 return f"Logged in as: {username}"
             except:
