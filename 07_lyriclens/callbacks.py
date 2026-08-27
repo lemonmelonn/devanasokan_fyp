@@ -412,4 +412,4 @@ def register_callbacks(app):
                 return f"Logged in as: {username}"
             except:
                 return "Logout"
-        return "Login to Spotify"
+        return "Connect to Spotify"
