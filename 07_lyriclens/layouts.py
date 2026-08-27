@@ -304,11 +304,11 @@ def song_classification_page():
             className="mt-4 g-3",
         ),
 
-        # Buttons for manual search, Spotify, and report generation
+        # Buttons for manual search, Currently Listening, and report generation
         html.Div(
             [
                 dbc.Button("Manual Search", id="manual-search-button", color="primary", className="dashboard-button me-2"),
-                dbc.Button("Spotify", id="get-current-song", color="primary", className="dashboard-button"),
+                dbc.Button("Currently Listening", id="get-current-song", color="primary", className="dashboard-button"),
                 dbc.Button("Get Report", id="predict-button", color="primary", className="dashboard-button ms-auto"),
             ],
             className="button-row mt-2"
