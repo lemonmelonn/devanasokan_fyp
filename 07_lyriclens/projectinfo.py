@@ -61,7 +61,7 @@ layout = dbc.Container(
                                     },
                                 ),
                                 html.Div(
-                                    "Devan Asokan | TP070977 | APU2601CS(DA) | Final Year Project",
+                                    "Devan Asokan | TP070977 | APU3F2601CS(DA) | Final Year Project",
                                     style={
                                         "fontSize": "0.95rem",
                                         "fontWeight": 600,
