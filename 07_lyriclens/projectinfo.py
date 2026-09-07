@@ -1,9 +1,11 @@
+# projectinfo.py
+
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import plotly.express as px
 import plotly.graph_objects as go
 
-
+# Create statistics card component
 def stat_card(value, label, accent="#10b981"):
     return dbc.Card(
         dbc.CardBody(
@@ -41,6 +43,7 @@ def stat_card(value, label, accent="#10b981"):
 # Home Info Layout
 layout = dbc.Container(
     [
+        # Header Section
         html.Div(
             [
                 html.Div(
@@ -58,11 +61,11 @@ layout = dbc.Container(
                                     },
                                 ),
                                 html.Div(
-                                    "Devan Asokan | TP070977 | APU2601CS(DA) | Final Year Project",
+                                    "Devan Asokan | TP070977 | APU3F2601CS(DA) | Final Year Project",
                                     style={
                                         "fontSize": "0.95rem",
                                         "fontWeight": 600,
-                                        "color": "#10b981",
+                                        "color": "#0ea5e9",
                                         "marginBottom": "1rem",
                                         "letterSpacing": "0.04em",
                                         "textTransform": "uppercase",

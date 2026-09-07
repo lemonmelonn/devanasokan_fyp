@@ -1,15 +1,16 @@
+# functions.py
 from ast import With
 import re
 import os
+import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 import lyricsgenius
 import contractions
-import pandas as pd
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
-import ollama
+from transformers import AutoTokenizer, pipeline
+import onnxruntime as ort
 
-from spotify_functions import get_song_details
+# from spotify_functions import get_song_details
 
 # Load environment variables from .env
 load_dotenv()
@@ -22,14 +23,17 @@ genius = lyricsgenius.Genius(
     retries=3
 )
 
+
 # Load the model from Hugging Face Hub using the pipeline API
 def load_model_from_hf():
     classifier = pipeline(
         "text-classification",
         model="devanasokan/bert-lyrics-classifier",
+        framework="pt"
     )
     print("Trained BERT model loaded from Hugging Face Hub.")
     return classifier
+
 
 # Function to detect if a song is explicit based on Spotify metadata
 def detect_explicit(songdetails):
@@ -44,10 +48,11 @@ def detect_explicit(songdetails):
         print(f"Explicit: {explicit}")
         return False
 
+
 # Function to fetch lyrics for a given track and artist
 def get_structured_lyrics(artist, track):
     try:
-        # Search using both track name and artist name to avoid getting the wrong song or a cover version.
+        # Search for the song using the Genius API
         song = genius.search_song(track, artist)
 
         if song:
@@ -232,9 +237,79 @@ def clean_verses(verse_records):
     return verse_records
 
 
+# Get model output for each verse and assign labels
 def get_model_output(classifier, verse_records):
     label_list = []
+    
+    # Initialize tokenizer for the BERT model
+    tokenizer = AutoTokenizer.from_pretrained("devanasokan/bert-lyrics-classifier")
+    MAX_TOKENS = 512
+    STRIDE = 256  # Overlap between chunks
+    
+    def predict_with_sliding_window(text, classifier, tokenizer, max_tokens=512, stride=256):
+        """
+        Split long text into overlapping chunks and aggregate predictions.
+        Returns the aggregated label and confidence score.
+        """
+        # Tokenize the full text
+        tokens = tokenizer.encode(text, add_special_tokens=False)
+        
+        # If text fits in one chunk, predict directly
+        if len(tokens) <= max_tokens:
+            result = classifier(text)
+            return result[0]["label"], result[0]["score"]
+        
+        print(f"Long verse detected: {len(tokens)} tokens (max: {max_tokens}). Using sliding window...")
+        
+        # Split into overlapping chunks
+        chunk_predictions = []
+        
+        for i in range(0, len(tokens), stride):
+            chunk_tokens = tokens[i:i + max_tokens]
+            
+            # Skip very small chunks at the end
+            if len(chunk_tokens) < 50:
+                continue
+            
+            # Decode chunk back to text
+            chunk_text = tokenizer.decode(chunk_tokens)
+            
+            print(f"  Processing chunk {len(chunk_predictions) + 1}: {len(chunk_tokens)} tokens")
+            
+            try:
+                result = classifier(chunk_text)
+                chunk_predictions.append({
+                    "label": result[0]["label"],
+                    "score": result[0]["score"]
+                })
+            except Exception as e:
+                print(f"  Error processing chunk: {e}")
+                continue
+        
+        if not chunk_predictions:
+            # Fallback: truncate to max length
+            print(f"  Failed to process chunks. Truncating to {max_tokens} tokens...")
+            truncated_tokens = tokens[:max_tokens]
+            truncated_text = tokenizer.decode(truncated_tokens)
+            result = classifier(truncated_text)
+            return result[0]["label"], result[0]["score"]
+        
+        # Aggregate predictions using voting
+        # Count LABEL_1 (UNSAFE) vs LABEL_0 (SAFE)
+        unsafe_count = sum(1 for p in chunk_predictions if p["label"] == "LABEL_1")
+        safe_count = len(chunk_predictions) - unsafe_count
+        
+        # Determine aggregated label (majority vote)
+        aggregated_label = "LABEL_1" if unsafe_count > 0 else "LABEL_0"
+        
+        # Average confidence score across chunks
+        aggregated_score = sum(p["score"] for p in chunk_predictions) / len(chunk_predictions)
+        
+        print(f"  Aggregated: {safe_count} SAFE, {unsafe_count} UNSAFE → {aggregated_label} (confidence: {aggregated_score:.4f})")
+        
+        return aggregated_label, aggregated_score
 
+    # Loop through each verse and get model output
     for row in verse_records:
         verse = (row.get("clean_verse") or "").strip()
         if not verse:
@@ -242,22 +317,29 @@ def get_model_output(classifier, verse_records):
             row["score"] = ""
             continue
 
-        result = classifier(verse)
+        try:
+            # Get prediction from the model (with sliding window for long verses)
+            label, score = predict_with_sliding_window(verse, classifier, tokenizer, MAX_TOKENS, STRIDE)
 
-        label = result[0]["label"]
-        if label == "LABEL_0":
-            label = "SAFE"
-        elif label == "LABEL_1":
-            label = "UNSAFE"
-        else:
-            label = "UNKNOWN"
+            # Map model labels to human-readable labels
+            if label == "LABEL_0":
+                label = "SAFE"
+            elif label == "LABEL_1":
+                label = "UNSAFE"
+            else:
+                label = "UNKNOWN"
 
-        score = result[0]["score"]
+            row["label"] = label
+            row["score"] = float(score)
+            label_list.append(label)
+            
+        except Exception as e:
+            print(f"Error predicting verse: {e}")
+            row["label"] = "ERROR"
+            row["score"] = ""
 
-        row["label"] = label
-        row["score"] = float(score)
-        label_list.append(label)
+    print(f"Labels assigned: {label_list}")
 
+    # Determine overall song label based on individual verse labels
     ovr_label = "UNSAFE" if "UNSAFE" in label_list else "SAFE"
-    print("Update complete")
     return verse_records, ovr_label

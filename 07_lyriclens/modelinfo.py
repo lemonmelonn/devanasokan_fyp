@@ -1,3 +1,5 @@
+# modelinfo.py
+
 from dash import html
 import dash_bootstrap_components as dbc
 
@@ -23,6 +25,7 @@ BODY_TEXT_STYLE = {
 }
 
 
+# Helper function to create a list of specifications
 def _spec_list(items):
     return html.Ul(
         [html.Li(item, style={"marginBottom": "0.45rem"}) for item in items],
@@ -30,6 +33,7 @@ def _spec_list(items):
     )
 
 
+# Function to create the model architecture and outline card
 def outline_card():
     summary = html.P(
         "Fine-tuned BERT (bert-base-uncased) sequence classification model trained for verse-level lyrical safety classification.",
@@ -91,6 +95,7 @@ def outline_card():
     )
 
 
+# Data cleaning and normalization card
 def data_prep_card():
     left_col = dbc.Card(
         dbc.CardBody(
@@ -121,6 +126,7 @@ def data_prep_card():
                         "Contextual Labeling: Ground-truth labels annotated via local LLaMA 3 zero-shot semantic safety prompts.",
                         "Class Balancing: Undersampled majority Safe class to establish an exact 50:50 balanced distribution.",
                         "Stratified Splitting: Evaluated 70:15:15 and 80:10:10 train/val/test splits with fixed seed (SEED = 42) for reproducibility.",
+                        "Final Split: 80% Train, 10% Validation, 10% Test.",
                     ]
                 ),
             ]
@@ -144,6 +150,7 @@ def data_prep_card():
     )
 
 
+# Function to create the performance metrics and evaluation card
 def _kpi_card(title, value, accent):
     return dbc.Card(
         dbc.CardBody(
@@ -160,13 +167,14 @@ def _kpi_card(title, value, accent):
     )
 
 
+# Performance metrics and evaluation card
 def performance_card():
     metric_row = dbc.Row(
         [
-            dbc.Col(_kpi_card("Accuracy", "88.96%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("Precision", "89.21%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("Recall", "88.64%", "#0ea5e9"), xs=12, sm=6, xl=3),
-            dbc.Col(_kpi_card("F1-Score", "88.92%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Accuracy", "89.25%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Precision", "89.18%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("Recall", "89.34%", "#0ea5e9"), xs=12, sm=6, xl=3),
+            dbc.Col(_kpi_card("F1-Score", "89.26%", "#0ea5e9"), xs=12, sm=6, xl=3),
         ],
         className="g-4",
     )
@@ -216,6 +224,7 @@ def performance_card():
     return html.Div([metric_row, diagnostics_row])
 
 
+# Production deployment and real-time pipeline card
 def deployment_card():
     return dbc.Card(
         dbc.CardBody(
@@ -279,6 +288,7 @@ def deployment_card():
     )
 
 
+# Overall layout for the model information page
 layout = dbc.Container(
     [
         html.H2("Model Architecture & Outline", className="section-header mb-3"),
