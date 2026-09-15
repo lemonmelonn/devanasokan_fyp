@@ -214,7 +214,9 @@ evaluation/
 preparation/
 storage/
 huggingface_cache/
+modeldata/
 my_bert_models/
+old_dashboard/
 onnx_model/
 
 # Model Training Artifacts
@@ -226,8 +228,6 @@ onnx_model/
 05_model_training/rnn_artifacts
 05_model_training/rnn_lyrics_classifier.pt
 05_model_training/results/
-
-06_dashboard/my_final_model/
 
 # CSV Files
 *.csv
