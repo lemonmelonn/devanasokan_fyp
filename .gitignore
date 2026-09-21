@@ -231,3 +231,4 @@ onnx_model/
 
 # CSV Files
 *.csv
+checkver.py
